@@ -1,0 +1,11 @@
+[watch]
+ignore = ["target/*", "templates/*", ".git/*"]
+
+[[watch.extensions]]
+extension = "rs"
+
+[[watch.paths]]
+path = "."
+
+[[watch.commands]]
+command = "cargo build"
