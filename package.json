@@ -1,0 +1,21 @@
+{
+	"private": true,
+	"author": {
+		"name": "Doinel Atanasiu",
+		"email": "doinel1atanasiu@gmail.com",
+		"url": "https://business-link.d1a.app"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/doinel1a/gen-x"
+	},
+	"license": "GPL-3.0",
+	"scripts": {
+		"postinstall": "npx husky install"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^17.7.2",
+		"@commitlint/config-conventional": "^17.7.0",
+		"husky": "^8.0.3"
+	}
+}
