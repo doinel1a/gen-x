@@ -1,13 +1,12 @@
 use actix_cors::Cors;
-use actix_web::{get, middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{middleware::Logger, web, App, HttpServer};
+
+mod endpoints;
+
+use endpoints::healthcheck::healthcheck;
 
 const ADDRESS: &str = "0.0.0.0";
 const PORT: u16 = 8080;
-
-#[get("/test")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello, World!")
-}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -21,7 +20,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(logger)
             .wrap(Cors::permissive())
-            .service(web::scope("/api").service(web::scope("/v1").service(hello)))
+            .service(web::scope("/api").service(web::scope("/v1").service(healthcheck)))
     })
     .bind((ADDRESS, PORT))?
     .run()
