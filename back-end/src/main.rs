@@ -2,8 +2,9 @@ use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
 mod endpoints;
+mod models;
 
-use endpoints::healthcheck::healthcheck;
+use endpoints::{generate::generate, healthcheck::healthcheck};
 
 const ADDRESS: &str = "0.0.0.0";
 const PORT: u16 = 8080;
@@ -17,10 +18,9 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let logger = Logger::default();
 
-        App::new()
-            .wrap(logger)
-            .wrap(Cors::permissive())
-            .service(web::scope("/api").service(web::scope("/v1").service(healthcheck)))
+        App::new().wrap(logger).wrap(Cors::permissive()).service(
+            web::scope("/api").service(web::scope("/v1").service(healthcheck).service(generate)),
+        )
     })
     .bind((ADDRESS, PORT))?
     .run()
