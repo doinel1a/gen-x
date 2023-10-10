@@ -1,8 +1,11 @@
 use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
+mod analysis;
 mod endpoints;
 mod models;
+mod rendering;
+mod utils;
 
 use endpoints::{generate::generate, healthcheck::healthcheck};
 

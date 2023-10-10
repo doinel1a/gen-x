@@ -6,3 +6,9 @@ pub struct Output {
     pub type_: String,
     pub multi_result: Option<bool>,
 }
+
+impl Output {
+    pub fn type_(&self) -> &String {
+        &self.type_
+    }
+}
