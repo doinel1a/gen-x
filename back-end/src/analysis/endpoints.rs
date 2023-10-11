@@ -98,35 +98,41 @@ fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> ReadonlyEndpointPat
     let mut folder = String::new();
     let mut page_name = String::new();
 
-    match docs {
-        Some(docs) => {
-            for string in docs {
-                if string.contains("path:") {
-                    let path_str = string
-                        .replace(" ", "")
-                        .trim_start_matches("path:")
-                        .to_string();
+    if let Some(_docs) = docs {
+        for string in _docs {
+            if string.contains("path:") {
+                let path_str = string
+                    .replace(" ", "")
+                    .trim_start_matches("path:")
+                    .to_string();
 
-                    let path = Path::new(&path_str);
+                let path = Path::new(&path_str);
 
-                    if let Some(parent) = path.parent() {
-                        folder = parent.to_str().unwrap_or("").to_string();
-                    }
+                if let Some(parent) = path.parent() {
+                    let parent = parent.to_str().unwrap_or("").to_string();
 
-                    if let Some(file_name) = path.file_name() {
-                        page_name = file_name.to_str().unwrap_or("").to_string();
-                    }
-
-                    if !folder.is_empty() && !page_name.is_empty() {
-                        return ReadonlyEndpointPath { folder, page_name };
-                    }
+                    folder = if parent == "/" {
+                        "/pages".to_string()
+                    } else {
+                        parent
+                    };
                 }
-            }
-        }
-        None => {
-            return ReadonlyEndpointPath {
-                folder: "".to_string(),
-                page_name: "".to_string(),
+
+                if let Some(file_name) = path.file_name() {
+                    let file_name = file_name.to_str().unwrap_or("").to_string();
+
+                    page_name = if file_name == "pages" {
+                        "dashboard".to_string()
+                    } else {
+                        file_name
+                    };
+                }
+
+                println!("{} | {}", folder, page_name);
+
+                if !folder.is_empty() && !page_name.is_empty() {
+                    return ReadonlyEndpointPath { folder, page_name };
+                }
             }
         }
     }
