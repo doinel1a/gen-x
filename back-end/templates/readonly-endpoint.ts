@@ -23,10 +23,7 @@ import {
 
 const resultsParser = new ResultsParser();
 
-{% let capitalied_hook_name  = hook_name.capitalize_first_letter() %}
-{% let lowerized_hook_name  = hook_name.lowerize_first_letter() %}
-
-export default function use{{ capitalied_hook_name }}(
+export default function {{ hook_name }}(
   {% if inputs.len() > 0 %}
     {% for input in inputs %}
       {{ input.name}}: {{ input.type_}},
@@ -45,7 +42,7 @@ export default function use{{ capitalied_hook_name }}(
     {% endfor %}
   {% endif %}
 
-	async function {{ lowerized_hook_name }}() {
+	async function {{ function_name }}() {
 		try {
 			const query = counterContract.createQuery({
 				func: new ContractFunction('{{ endpoint_name }}'),
@@ -111,7 +108,7 @@ export default function use{{ capitalied_hook_name }}(
 	}
 
 	useEffect(() => {
-		{{ lowerized_hook_name }}();
+		{{ function_name }}();
 	}, []);
 
   {% if outputs.len() > 0 %}

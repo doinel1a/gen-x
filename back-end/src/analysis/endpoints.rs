@@ -3,8 +3,11 @@ use std::collections::HashMap;
 use crate::models::sc_abi::endpoint::{Endpoint, Mutability};
 use crate::models::sc_abi::field::Field;
 use crate::models::sc_abi::output::Output;
+use crate::utils::string_mutation::StringMutation;
 
 pub struct ReadonlyEndpointProps {
+    pub hook_name: String,
+    pub file_name: String,
     pub inputs: Vec<ReadonlyEndpointInput>,
     pub outputs: Vec<ReadonlyEndpointOutput>,
 }
@@ -31,12 +34,23 @@ pub fn get_readonly_endpoints_props(
         match endpoint.mutability() {
             Mutability::Mutable => {}
             Mutability::Readonly => {
+                let endpoint_hook_name = format!(
+                    "use{}",
+                    endpoint
+                        .name()
+                        .to_string()
+                        .snake_to_camel_case()
+                        .capitalize_first_letter()
+                );
+                let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
                 let endpoint_inputs = get_readonly_endpoint_inputs(endpoint.inputs());
                 let endpoint_outputs = get_readonly_endpoints_outputs(endpoint.outputs());
 
                 endpoint_props.insert(
                     endpoint.name().to_string(),
                     ReadonlyEndpointProps {
+                        hook_name: endpoint_hook_name,
+                        file_name: endpoint_file_name,
                         inputs: endpoint_inputs,
                         outputs: endpoint_outputs,
                     },
