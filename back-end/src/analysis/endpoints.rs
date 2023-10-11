@@ -6,25 +6,29 @@ use crate::models::sc_abi::field::Field;
 use crate::models::sc_abi::output::Output;
 use crate::utils::string_mutation::StringMutation;
 
+#[derive(Debug)]
 pub struct ReadonlyEndpointProps {
-    pub path: ReadonlyEndpointPath,
+    pub name: String,
     pub hook_name: String,
     pub file_name: String,
     pub inputs: Vec<ReadonlyEndpointInput>,
     pub outputs: Vec<ReadonlyEndpointOutput>,
 }
 
+#[derive(Clone, Debug)]
 pub struct ReadonlyEndpointPath {
     pub folder: String,
     pub page_name: String,
 }
 
+#[derive(Debug)]
 pub struct ReadonlyEndpointInput {
     pub name: String,
     pub type_: String,
     pub args_serializer: String,
 }
 
+#[derive(Debug)]
 pub struct ReadonlyEndpointOutput {
     pub getter: String,
     pub setter: String,
@@ -34,8 +38,8 @@ pub struct ReadonlyEndpointOutput {
 
 pub fn get_readonly_endpoints_props(
     endpoints: &Vec<Endpoint>,
-) -> HashMap<String, ReadonlyEndpointProps> {
-    let mut endpoint_props: HashMap<String, ReadonlyEndpointProps> = Default::default();
+) -> HashMap<(String, String), Vec<ReadonlyEndpointProps>> {
+    let mut pages_props: HashMap<(String, String), Vec<ReadonlyEndpointProps>> = Default::default();
 
     for endpoint in endpoints {
         match endpoint.mutability() {
@@ -49,26 +53,45 @@ pub fn get_readonly_endpoints_props(
                         .snake_to_camel_case()
                         .capitalize_first_letter()
                 );
-                let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
                 let endpoint_path = get_readonly_endpoint_path(endpoint.docs());
+                let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
                 let endpoint_inputs = get_readonly_endpoint_inputs(endpoint.inputs());
                 let endpoint_outputs = get_readonly_endpoints_outputs(endpoint.outputs());
 
-                endpoint_props.insert(
-                    endpoint.name().to_string(),
-                    ReadonlyEndpointProps {
-                        path: endpoint_path,
+                if pages_props.contains_key(&(
+                    endpoint_path.folder.clone(),
+                    endpoint_path.page_name.clone(),
+                )) {
+                    let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
+
+                    if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
+                        _endpoint_props.push(ReadonlyEndpointProps {
+                            name: endpoint.name().to_string(),
+                            hook_name: endpoint_hook_name,
+                            file_name: endpoint_file_name,
+                            inputs: endpoint_inputs,
+                            outputs: endpoint_outputs,
+                        });
+                    }
+                } else {
+                    let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
+                    let mut endpoints_props = Vec::<ReadonlyEndpointProps>::new();
+
+                    endpoints_props.push(ReadonlyEndpointProps {
+                        name: endpoint.name().to_string(),
                         hook_name: endpoint_hook_name,
                         file_name: endpoint_file_name,
                         inputs: endpoint_inputs,
                         outputs: endpoint_outputs,
-                    },
-                );
+                    });
+
+                    pages_props.insert((folder, page_name), endpoints_props);
+                }
             }
         }
     }
 
-    endpoint_props
+    pages_props
 }
 
 fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> ReadonlyEndpointPath {

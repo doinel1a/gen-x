@@ -27,33 +27,26 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
 
     let endpoints_props = get_readonly_endpoints_props(endpoints);
 
-    for (endpoint_name, props) in endpoints_props {
-        let rendered_endpoint = readonly_endpoint::render(
-            &props.hook_name,
-            &endpoint_name,
-            &props.inputs,
-            &props.outputs,
-        );
-
-        zip_writer
-            .start_file(format!("/endpoints/{}.ts", &props.file_name), zip_options)
-            .unwrap();
-        zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
-
-        let page_folder = props.path.folder;
-        let page_name = props.path.page_name;
-
-        if !page_folder.is_empty() && !page_name.is_empty() {
-            let rendered_page = page::render(
-                &page_name,
+    for ((folder, page_name), ep_props) in endpoints_props {
+        for props in &ep_props {
+            let rendered_endpoint = readonly_endpoint::render(
                 &props.hook_name,
-                &props.file_name,
+                &props.name,
                 &props.inputs,
                 &props.outputs,
             );
 
             zip_writer
-                .start_file(format!("{}/{}.tsx", page_folder, page_name), zip_options)
+                .start_file(format!("/endpoints/{}.ts", &props.file_name), zip_options)
+                .unwrap();
+            zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
+        }
+
+        if !folder.is_empty() && !page_name.is_empty() {
+            let rendered_page = page::render(&page_name, &ep_props);
+
+            zip_writer
+                .start_file(format!("{}/{}.tsx", folder, page_name), zip_options)
                 .unwrap();
             zip_writer.write_all(rendered_page.as_bytes()).unwrap();
         }
