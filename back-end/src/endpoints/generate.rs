@@ -1,7 +1,7 @@
 use std::io::{Cursor, Write};
 
 use actix_web::web::{Bytes, Json};
-use actix_web::{get, Error, HttpResponse};
+use actix_web::{post, Error, HttpResponse};
 use serde::Deserialize;
 use zip::write::FileOptions;
 use zip::ZipWriter;
@@ -15,7 +15,7 @@ struct Body {
     sc_abi: SCAbi,
 }
 
-#[get("/generate")]
+#[post("/generate")]
 async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
     let mut zip_buffer = Vec::new();
     let buffer_cursor = Cursor::new(&mut zip_buffer);
