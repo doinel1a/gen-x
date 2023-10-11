@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /*
+		https://tailwindcss.com/docs/customizing-colors
+	*/
+  --primary: #171717; /* neutral-900 */
+  --secondary: #262626; /* neutral-800 */
+  --tertiary: #404040; /* neutral-700 */
+  --color-dark: #303030;
+  --color-light: #f3f3f3;
+  --accent-primary: #1d4ed8; /* blue-700 */
+  --accent-primary-state: #1d35d8; /* blue-custom */
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    @apply h-full w-full;
+  }
+
+  body {
+    @apply bg-primary text-color-light;
+  }
+
+  #root {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  input[type='number']::-webkit-inner-spin-button {
+    display: none;
+  }
+
+  input[type='number'] {
+    appearance: textfiled;
+  }
+}
