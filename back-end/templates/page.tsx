@@ -31,7 +31,7 @@ export default function {{ title }}() {
         {{ endpoint.hook_name }}(
           {% if endpoint.inputs.len() > 0 %}
             {%- for input in endpoint.inputs -%}
-              {{ endpoint.hook_name }}{{ input.name}},
+              {{ input.initial_value }},
             {% endfor %}
           {% endif %}
         );
