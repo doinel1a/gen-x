@@ -155,8 +155,6 @@ The only way to test the solutions is to run it locally:
   - [ ] Test generate endpoint from front-end;
   - [ ] Set back-end url dynamically based on dev env;
   - [ ] Display back-end errors in the UI;
-  - [x] Fix MultiversX sdk UI styling;
-  - [x] Update [dApp boilerplate][dapp-boilerplate] to the last version;
 - **Back-end**:
   - [x] Test generate endpoint to download .zip archive;
   - [x] Set listen address dynamically based on the environment;
@@ -175,13 +173,15 @@ The only way to test the solutions is to run it locally:
         - [ ] Render & "assemble" endpoints in the specified page;
         - [ ] Render custom types - Struct & Enum;
       - [ ] Custom types;
+  - [x] Fix MultiversX sdk UI styling;
+  - [x] Update [dApp boilerplate][dapp-boilerplate] to the last version;
 - **CI / CD**:
-  - [ ] Deploy front-end ([vercel][vercel]);
+  - [x] Deploy front-end ([vercel][vercel]);
   - [ ] Deploy back-end ([fly.io][fly.io]);
   - [ ] Set-up Docker;
   - [ ] Optimize Docker image size;
   - [ ] CI / CD github actions;
-  - [ ] Trigger vercel deployments only on front-end folder push; <br />
+  - [x] Trigger vercel deployments only on front-end folder push; <br />
         (`git diff --quiet HEAD^ HEAD -- .` in git project settings; `.` since `front-end` is setted as root directory)
   - [ ] Trigger fly.io deployments, through gh actions, only on back-end folder push;
 
