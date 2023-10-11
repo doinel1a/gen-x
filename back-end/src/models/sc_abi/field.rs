@@ -7,3 +7,13 @@ pub struct Field {
     pub type_: String,
     pub indexed: Option<bool>,
 }
+
+impl Field {
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn type_(&self) -> &String {
+        &self.type_
+    }
+}

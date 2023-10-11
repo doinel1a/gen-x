@@ -14,3 +14,13 @@ pub struct SCAbi {
     has_callback: bool,
     types: HashMap<String, CustomType>,
 }
+
+impl SCAbi {
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn endpoints(&self) -> &Vec<Endpoint> {
+        &self.endpoints
+    }
+}

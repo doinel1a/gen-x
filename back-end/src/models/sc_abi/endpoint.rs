@@ -21,3 +21,25 @@ pub enum Mutability {
     Mutable,
     Readonly,
 }
+
+impl Endpoint {
+    pub fn docs(&self) -> &Option<Vec<String>> {
+        &self.docs
+    }
+
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn mutability(&self) -> &Mutability {
+        &self.mutability
+    }
+
+    pub fn inputs(&self) -> &Vec<Field> {
+        &self.inputs
+    }
+
+    pub fn outputs(&self) -> &Vec<Output> {
+        &self.outputs
+    }
+}
