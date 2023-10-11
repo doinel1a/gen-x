@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 
 use crate::models::sc_abi::endpoint::{Endpoint, Mutability};
 use crate::models::sc_abi::field::Field;
@@ -6,10 +7,16 @@ use crate::models::sc_abi::output::Output;
 use crate::utils::string_mutation::StringMutation;
 
 pub struct ReadonlyEndpointProps {
+    pub path: ReadonlyEndpointPath,
     pub hook_name: String,
     pub file_name: String,
     pub inputs: Vec<ReadonlyEndpointInput>,
     pub outputs: Vec<ReadonlyEndpointOutput>,
+}
+
+pub struct ReadonlyEndpointPath {
+    pub folder: String,
+    pub page_name: String,
 }
 
 pub struct ReadonlyEndpointInput {
@@ -43,12 +50,14 @@ pub fn get_readonly_endpoints_props(
                         .capitalize_first_letter()
                 );
                 let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
+                let endpoint_path = get_readonly_endpoint_path(endpoint.docs());
                 let endpoint_inputs = get_readonly_endpoint_inputs(endpoint.inputs());
                 let endpoint_outputs = get_readonly_endpoints_outputs(endpoint.outputs());
 
                 endpoint_props.insert(
                     endpoint.name().to_string(),
                     ReadonlyEndpointProps {
+                        path: endpoint_path,
                         hook_name: endpoint_hook_name,
                         file_name: endpoint_file_name,
                         inputs: endpoint_inputs,
@@ -60,6 +69,49 @@ pub fn get_readonly_endpoints_props(
     }
 
     endpoint_props
+}
+
+fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> ReadonlyEndpointPath {
+    let mut folder = String::new();
+    let mut page_name = String::new();
+
+    match docs {
+        Some(docs) => {
+            for string in docs {
+                if string.contains("path:") {
+                    let path_str = string
+                        .replace(" ", "")
+                        .trim_start_matches("path:")
+                        .to_string();
+
+                    let path = Path::new(&path_str);
+
+                    if let Some(parent) = path.parent() {
+                        folder = parent.to_str().unwrap_or("").to_string();
+                    }
+
+                    if let Some(file_name) = path.file_name() {
+                        page_name = file_name.to_str().unwrap_or("").to_string();
+                    }
+
+                    if !folder.is_empty() && !page_name.is_empty() {
+                        return ReadonlyEndpointPath { folder, page_name };
+                    }
+                }
+            }
+        }
+        None => {
+            return ReadonlyEndpointPath {
+                folder: "".to_string(),
+                page_name: "".to_string(),
+            }
+        }
+    }
+
+    ReadonlyEndpointPath {
+        folder: "".to_string(),
+        page_name: "".to_string(),
+    }
 }
 
 fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<ReadonlyEndpointInput> {

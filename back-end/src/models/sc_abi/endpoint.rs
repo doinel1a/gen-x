@@ -23,6 +23,10 @@ pub enum Mutability {
 }
 
 impl Endpoint {
+    pub fn docs(&self) -> &Option<Vec<String>> {
+        &self.docs
+    }
+
     pub fn name(&self) -> &String {
         &self.name
     }

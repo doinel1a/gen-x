@@ -8,7 +8,7 @@ use zip::ZipWriter;
 
 use crate::analysis::endpoints::get_readonly_endpoints_props;
 use crate::models::sc_abi::sc_abi::SCAbi;
-use crate::rendering::readonly_endpoint;
+use crate::rendering::{page, readonly_endpoint};
 
 #[derive(Deserialize, Debug)]
 struct Body {
@@ -39,6 +39,24 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
             .start_file(format!("/endpoints/{}.ts", &props.file_name), zip_options)
             .unwrap();
         zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
+
+        let page_folder = props.path.folder;
+        let page_name = props.path.page_name;
+
+        if !page_folder.is_empty() && !page_name.is_empty() {
+            let rendered_page = page::render(
+                &page_name,
+                &props.hook_name,
+                &props.file_name,
+                &props.inputs,
+                &props.outputs,
+            );
+
+            zip_writer
+                .start_file(format!("{}/{}.tsx", page_folder, page_name), zip_options)
+                .unwrap();
+            zip_writer.write_all(rendered_page.as_bytes()).unwrap();
+        }
     }
 
     let end_cursor = zip_writer.finish().unwrap();
