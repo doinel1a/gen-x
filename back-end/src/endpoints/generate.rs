@@ -8,9 +8,9 @@ use std::path::Path;
 use zip::write::FileOptions;
 use zip::ZipWriter;
 
-use crate::analysis::endpoints::get_readonly_endpoints_props;
+use crate::analysis::endpoints::{get_readonly_endpoints_props, ReadonlyEndpointProps};
 use crate::models::sc_abi::sc_abi::SCAbi;
-use crate::rendering::{page, readonly_endpoint};
+use crate::rendering::{page, readonly_endpoint, routes};
 
 const DAPP_BOOTSTRAPPER_URI: &str = "dapp_bootstrapper";
 
@@ -36,7 +36,25 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
         zip_options,
     )?;
 
-    let endpoints_props = get_readonly_endpoints_props(endpoints);
+    let mut endpoints_props = get_readonly_endpoints_props(endpoints);
+    let does_page_contain_dashboard = endpoints_props
+        .keys()
+        .any(|(_, page_name)| page_name == "dashboard");
+
+    if !does_page_contain_dashboard {
+        endpoints_props.insert(
+            ("/pages".to_string(), "dashboard".to_string()),
+            Vec::<ReadonlyEndpointProps>::new(),
+        );
+    }
+
+    let routes: Vec<(String, String)> = endpoints_props
+        .keys()
+        .filter(|(folder, page_name)| !folder.is_empty() && !page_name.is_empty())
+        .cloned()
+        .collect();
+
+    add_dynamic_pages_to_routes(&routes, &mut zip_writer, zip_options)?;
 
     for ((folder, page_name), ep_props) in endpoints_props {
         for props in &ep_props {
@@ -103,6 +121,21 @@ fn add_dapp_bootstrapper_files(
             add_dapp_bootstrapper_files(&root_dir, &path, zip_writer, zip_options)?;
         }
     }
+
+    Ok(())
+}
+
+fn add_dynamic_pages_to_routes(
+    routes: &Vec<(String, String)>,
+    zip_writer: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
+    zip_options: FileOptions,
+) -> Result<(), std::io::Error> {
+    let rendered_routes = routes::render(routes);
+
+    zip_writer
+        .start_file("src/config/routes.ts", zip_options)
+        .unwrap();
+    zip_writer.write_all(rendered_routes.as_bytes()).unwrap();
 
     Ok(())
 }

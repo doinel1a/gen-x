@@ -7,10 +7,9 @@ import {
 import React from 'react';
 import Layout from '../components/layout';
 import AuthRedirectWrapper from '../components/layout/auth-redirect-wrapper';
-import { routesName } from '../config/routes';
 
 const loginProperties = {
-  callbackRoute: routesName.dashboard,
+  callbackRoute: '/dashboard',
   nativeAuth: true
 };
 

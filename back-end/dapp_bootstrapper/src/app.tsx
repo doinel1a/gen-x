@@ -8,10 +8,7 @@ import { DappProvider } from '@multiversx/sdk-dapp/wrappers';
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { apiTimeout, walletConnectV2ProjectId } from './config/devnet';
-import { routesName } from './config/routes';
-import Dashboard from './pages/dashboard';
-import Home from './pages/home';
-import Login from './pages/login';
+import { routes } from './config/routes';
 
 const className = '!text-color-dark';
 
@@ -30,9 +27,9 @@ function App() {
         <NotificationModal />
         <SignTransactionsModals />
         <Routes>
-          <Route path={routesName.home} element={<Home />} />
-          <Route path={routesName.dashboard} element={<Dashboard />} />
-          <Route path={routesName.login} element={<Login />} />
+          {routes.map((route) => (
+            <Route key={route.path} path={route.path} Component={route.page} />
+          ))}
         </Routes>
       </DappProvider>
     </BrowserRouter>
