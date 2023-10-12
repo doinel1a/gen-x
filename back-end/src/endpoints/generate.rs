@@ -10,8 +10,9 @@ use zip::write::FileOptions;
 use zip::ZipWriter;
 
 use crate::analysis::endpoints::{get_readonly_endpoints_props, ReadonlyEndpointProps};
+use crate::models::sc_abi::endpoint::Mutability;
 use crate::models::sc_abi::sc_abi::SCAbi;
-use crate::rendering::{page, readonly_endpoint, routes};
+use crate::rendering::{mutable_endpoint, page, readonly_endpoint, routes};
 
 const DAPP_BOOTSTRAPPER_URI: &str = "dapp_bootstrapper";
 
@@ -111,8 +112,6 @@ fn add_readonly_endpoints_files(
         .keys()
         .any(|(_, page_name)| page_name == "dashboard");
 
-    println!("DASH {}", does_page_contain_dashboard);
-
     if !does_page_contain_dashboard {
         endpoints_props.insert(
             ("/pages".to_string(), "dashboard".to_string()),
@@ -122,17 +121,37 @@ fn add_readonly_endpoints_files(
 
     for ((folder, page_name), ep_props) in &mut *endpoints_props {
         for props in &mut *ep_props {
-            let rendered_endpoint = readonly_endpoint::render(
-                &props.hook_name,
-                &props.name,
-                &props.inputs,
-                &props.outputs,
-            );
+            match props.mutability {
+                Mutability::Mutable => {
+                    let rendered_endpoint = mutable_endpoint::render(
+                        &props.hook_name,
+                        &props.name,
+                        &props.inputs,
+                        &props.outputs,
+                    );
 
-            zip_writer
-                .start_file(format!("src/hooks/{}.ts", &props.file_name), zip_options)
-                .unwrap();
-            zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
+                    zip_writer
+                        .start_file(
+                            format!("src/components/endpoints/{}.tsx", &props.file_name),
+                            zip_options,
+                        )
+                        .unwrap();
+                    zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
+                }
+                Mutability::Readonly => {
+                    let rendered_endpoint = readonly_endpoint::render(
+                        &props.hook_name,
+                        &props.name,
+                        &props.inputs,
+                        &props.outputs,
+                    );
+
+                    zip_writer
+                        .start_file(format!("src/hooks/{}.ts", &props.file_name), zip_options)
+                        .unwrap();
+                    zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
+                }
+            }
         }
 
         if !folder.is_empty() && !page_name.is_empty() {

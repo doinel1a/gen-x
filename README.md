@@ -166,12 +166,13 @@ The only way to test the solutions is to run it locally:
         - [x] Render all endpoints;
         - [x] Render & "assemble" endpoints in the specified page; <br />
               **To enable this feature, insert in the documentation of each endpoint a field like `path: /pages/page1`**
-        - [ ] Render custom types - Struct & Enum;
-      - [ ] Mutable:
-        - [ ] Render single endpoint w/ its inputs & outputs;
-        - [ ] Render all endpoints;
-        - [ ] Render & "assemble" endpoints in the specified page;
-        - [ ] Render custom types - Struct & Enum;
+        - [ ] Handle custom types - Struct & Enum;
+      - [x] Mutable:
+        - [x] Render single endpoint w/ its inputs & outputs;
+        - [x] Render all endpoints;
+        - [x] Render & "assemble" endpoints in the specified page;
+              **To enable this feature, insert in the documentation of each endpoint a field like `path: /pages/page1`**
+        - [ ] Handle custom types - Struct & Enum;
       - [ ] Custom types;
   - [x] Fix MultiversX sdk UI styling;
   - [x] Update [dApp boilerplate][dapp-boilerplate] to the last version;
