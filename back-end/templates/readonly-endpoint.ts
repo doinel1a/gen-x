@@ -1,7 +1,7 @@
 import { useGetNetworkConfig } from '@multiversx/sdk-dapp/hooks';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import { useEffect, useState } from 'react';
-import counterContract from '../contracts/counter-contract';
+import contract from '../contracts/contract';
 
 import { 
   ContractFunction, 
@@ -44,7 +44,7 @@ export default function {{ hook_name }}(
 
 	async function {{ function_name }}() {
 		try {
-			const query = counterContract.createQuery({
+			const query = contract.createQuery({
 				func: new ContractFunction('{{ endpoint_name }}'),
         {% if inputs.len() > 0 %}
           args: [
@@ -58,7 +58,7 @@ export default function {{ hook_name }}(
 			});
 
 			const queryResponse = await proxy.queryContract(query);
-			const endpointDefinition = counterContract.getEndpoint('{{ endpoint_name }}');
+			const endpointDefinition = contract.getEndpoint('{{ endpoint_name }}');
 
 			const { firstValue, returnCode, returnMessage } =
 				resultsParser.parseQueryResponse(queryResponse, endpointDefinition);

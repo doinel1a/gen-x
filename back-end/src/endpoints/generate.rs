@@ -26,6 +26,7 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
     let mut zip_writer = ZipWriter::new(buffer_cursor);
     let zip_options = FileOptions::default();
 
+    let sc_abi = &body.sc_abi;
     let sc_name = body.sc_abi.name();
     let endpoints = body.sc_abi.endpoints();
 
@@ -35,6 +36,8 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
         &mut zip_writer,
         zip_options,
     )?;
+
+    add_sc_abi_file(&sc_abi, &mut zip_writer, zip_options)?;
 
     let mut endpoints_props = get_readonly_endpoints_props(endpoints);
     let does_page_contain_dashboard = endpoints_props
@@ -121,6 +124,21 @@ fn add_dapp_bootstrapper_files(
             add_dapp_bootstrapper_files(&root_dir, &path, zip_writer, zip_options)?;
         }
     }
+
+    Ok(())
+}
+
+fn add_sc_abi_file(
+    sc_abi: &SCAbi,
+    zip_writer: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
+    zip_options: FileOptions,
+) -> Result<(), std::io::Error> {
+    let abi_file = serde_json::to_string(sc_abi).unwrap();
+
+    zip_writer
+        .start_file("src/contracts-abi/contract.abi.json", zip_options)
+        .unwrap();
+    zip_writer.write_all(&abi_file.as_bytes()).unwrap();
 
     Ok(())
 }
