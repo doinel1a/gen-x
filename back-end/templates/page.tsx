@@ -4,7 +4,7 @@ import Layout from '../components/layout';
 
 {% if endpoints.len() > 0 %}
   {% for endpoint in endpoints %}
-    import {{ endpoint.hook_name }} from '../endpoints/{{ endpoint.file_name }}';
+    import {{ endpoint.hook_name }} from '../hooks/{{ endpoint.file_name }}';
   {% endfor %}
 {% endif %}
 

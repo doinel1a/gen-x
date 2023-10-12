@@ -66,7 +66,7 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
             );
 
             zip_writer
-                .start_file(format!("/endpoints/{}.ts", &props.file_name), zip_options)
+                .start_file(format!("src/hooks/{}.ts", &props.file_name), zip_options)
                 .unwrap();
             zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
         }
@@ -75,7 +75,7 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
             let rendered_page = page::render(&page_name, &ep_props);
 
             zip_writer
-                .start_file(format!("{}/{}.tsx", folder, page_name), zip_options)
+                .start_file(format!("src{}/{}.tsx", folder, page_name), zip_options)
                 .unwrap();
             zip_writer.write_all(rendered_page.as_bytes()).unwrap();
         }
