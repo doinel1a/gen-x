@@ -10,7 +10,7 @@ use crate::utils::string_mutation::StringMutation;
 pub struct EndpointProps {
     pub mutability: String,
     pub name: String,
-    pub hook_name: String,
+    pub import_export_name: String,
     pub file_name: String,
     pub inputs: Vec<EndpointInput>,
     pub outputs: Vec<EndpointOutput>,
@@ -66,7 +66,7 @@ pub fn get_readonly_endpoints_props(
                         _endpoint_props.push(EndpointProps {
                             mutability: "mutable".to_string(),
                             name: endpoint.name().to_string(),
-                            hook_name: component_name,
+                            import_export_name: component_name,
                             file_name: endpoint_file_name,
                             inputs: endpoint_inputs,
                             outputs: endpoint_outputs,
@@ -79,7 +79,7 @@ pub fn get_readonly_endpoints_props(
                     endpoints_props.push(EndpointProps {
                         mutability: "mutable".to_string(),
                         name: endpoint.name().to_string(),
-                        hook_name: component_name,
+                        import_export_name: component_name,
                         file_name: endpoint_file_name,
                         inputs: endpoint_inputs,
                         outputs: endpoint_outputs,
@@ -112,7 +112,7 @@ pub fn get_readonly_endpoints_props(
                         _endpoint_props.push(EndpointProps {
                             mutability: "readonly".to_string(),
                             name: endpoint.name().to_string(),
-                            hook_name: endpoint_hook_name,
+                            import_export_name: endpoint_hook_name,
                             file_name: endpoint_file_name,
                             inputs: endpoint_inputs,
                             outputs: endpoint_outputs,
@@ -125,7 +125,7 @@ pub fn get_readonly_endpoints_props(
                     endpoints_props.push(EndpointProps {
                         mutability: "readonly".to_string(),
                         name: endpoint.name().to_string(),
-                        hook_name: endpoint_hook_name,
+                        import_export_name: endpoint_hook_name,
                         file_name: endpoint_file_name,
                         inputs: endpoint_inputs,
                         outputs: endpoint_outputs,

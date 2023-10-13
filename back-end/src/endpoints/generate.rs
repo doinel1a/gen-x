@@ -123,7 +123,7 @@ fn add_readonly_endpoints_files(
             match props.mutability.as_str() {
                 "mutable" => {
                     let rendered_endpoint = mutable_endpoint::render(
-                        &props.hook_name,
+                        &props.import_export_name,
                         &props.name,
                         &props.inputs,
                         &props.outputs,
@@ -139,7 +139,7 @@ fn add_readonly_endpoints_files(
                 }
                 "readonly" => {
                     let rendered_endpoint = readonly_endpoint::render(
-                        &props.hook_name,
+                        &props.import_export_name,
                         &props.name,
                         &props.inputs,
                         &props.outputs,
