@@ -7,7 +7,7 @@ use crate::models::sc_abi::output::Output;
 use crate::utils::string_mutation::StringMutation;
 
 #[derive(Debug)]
-pub struct ReadonlyEndpointProps {
+pub struct EndpointProps {
     pub mutability: String,
     pub name: String,
     pub hook_name: String,
@@ -40,8 +40,8 @@ pub struct ReadonlyEndpointOutput {
 
 pub fn get_readonly_endpoints_props(
     endpoints: &Vec<Endpoint>,
-) -> HashMap<(String, String), Vec<ReadonlyEndpointProps>> {
-    let mut pages_props: HashMap<(String, String), Vec<ReadonlyEndpointProps>> = Default::default();
+) -> HashMap<(String, String), Vec<EndpointProps>> {
+    let mut pages_props: HashMap<(String, String), Vec<EndpointProps>> = Default::default();
 
     for endpoint in endpoints {
         match endpoint.mutability() {
@@ -63,7 +63,7 @@ pub fn get_readonly_endpoints_props(
                     let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
 
                     if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
-                        _endpoint_props.push(ReadonlyEndpointProps {
+                        _endpoint_props.push(EndpointProps {
                             mutability: "mutable".to_string(),
                             name: endpoint.name().to_string(),
                             hook_name: component_name,
@@ -74,9 +74,9 @@ pub fn get_readonly_endpoints_props(
                     }
                 } else {
                     let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
-                    let mut endpoints_props = Vec::<ReadonlyEndpointProps>::new();
+                    let mut endpoints_props = Vec::<EndpointProps>::new();
 
-                    endpoints_props.push(ReadonlyEndpointProps {
+                    endpoints_props.push(EndpointProps {
                         mutability: "mutable".to_string(),
                         name: endpoint.name().to_string(),
                         hook_name: component_name,
@@ -109,7 +109,7 @@ pub fn get_readonly_endpoints_props(
                     let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
 
                     if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
-                        _endpoint_props.push(ReadonlyEndpointProps {
+                        _endpoint_props.push(EndpointProps {
                             mutability: "readonly".to_string(),
                             name: endpoint.name().to_string(),
                             hook_name: endpoint_hook_name,
@@ -120,9 +120,9 @@ pub fn get_readonly_endpoints_props(
                     }
                 } else {
                     let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
-                    let mut endpoints_props = Vec::<ReadonlyEndpointProps>::new();
+                    let mut endpoints_props = Vec::<EndpointProps>::new();
 
-                    endpoints_props.push(ReadonlyEndpointProps {
+                    endpoints_props.push(EndpointProps {
                         mutability: "readonly".to_string(),
                         name: endpoint.name().to_string(),
                         hook_name: endpoint_hook_name,

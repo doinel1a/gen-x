@@ -9,7 +9,7 @@ use std::path::Path;
 use zip::write::FileOptions;
 use zip::ZipWriter;
 
-use crate::analysis::endpoints::{get_readonly_endpoints_props, ReadonlyEndpointProps};
+use crate::analysis::endpoints::{get_readonly_endpoints_props, EndpointProps};
 use crate::models::sc_abi::sc_abi::SCAbi;
 use crate::rendering::{mutable_endpoint, page, readonly_endpoint, routes};
 
@@ -103,7 +103,7 @@ fn add_sc_abi_file(
 }
 
 fn add_readonly_endpoints_files(
-    endpoints_props: &mut HashMap<(String, String), Vec<ReadonlyEndpointProps>>,
+    endpoints_props: &mut HashMap<(String, String), Vec<EndpointProps>>,
     zip_writer: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
     zip_options: FileOptions,
 ) -> Result<(), std::io::Error> {
@@ -114,7 +114,7 @@ fn add_readonly_endpoints_files(
     if !does_page_contain_dashboard {
         endpoints_props.insert(
             ("/pages".to_string(), "dashboard".to_string()),
-            Vec::<ReadonlyEndpointProps>::new(),
+            Vec::<EndpointProps>::new(),
         );
     }
 
