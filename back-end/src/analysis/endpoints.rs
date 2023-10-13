@@ -37,96 +37,58 @@ pub fn get_endpoints_props(
     let mut pages_props: HashMap<(String, String), Vec<EndpointProps>> = Default::default();
 
     for endpoint in endpoints {
-        match endpoint.mutability() {
-            Mutability::Mutable => {
-                let component_name = endpoint
-                    .name()
-                    .to_string()
-                    .snake_to_camel_case()
-                    .capitalize_first_letter();
-                let endpoint_path = get_endpoint_path(endpoint.docs());
-                let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
-                let endpoint_inputs = get_endpoint_inputs(endpoint.inputs());
-                let endpoint_outputs = get_endpoint_outputs(endpoint.outputs());
-
-                if pages_props.contains_key(&(
-                    endpoint_path.folder.clone(),
-                    endpoint_path.page_name.clone(),
-                )) {
-                    let EndpointPath { folder, page_name } = endpoint_path.clone();
-
-                    if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
-                        _endpoint_props.push(EndpointProps {
-                            mutability: "mutable".to_string(),
-                            name: endpoint.name().to_string(),
-                            import_export_name: component_name,
-                            file_name: endpoint_file_name,
-                            inputs: endpoint_inputs,
-                            outputs: endpoint_outputs,
-                        });
-                    }
-                } else {
-                    let EndpointPath { folder, page_name } = endpoint_path.clone();
-                    let mut endpoints_props = Vec::<EndpointProps>::new();
-
-                    endpoints_props.push(EndpointProps {
-                        mutability: "mutable".to_string(),
-                        name: endpoint.name().to_string(),
-                        import_export_name: component_name,
-                        file_name: endpoint_file_name,
-                        inputs: endpoint_inputs,
-                        outputs: endpoint_outputs,
-                    });
-
-                    pages_props.insert((folder, page_name), endpoints_props);
-                }
-            }
+        let endpoint_name = endpoint
+            .name()
+            .to_string()
+            .snake_to_camel_case()
+            .capitalize_first_letter();
+        let import_export_name = match endpoint.mutability() {
+            Mutability::Mutable => endpoint_name,
             Mutability::Readonly => {
-                let endpoint_hook_name = format!(
-                    "use{}",
-                    endpoint
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                );
-                let endpoint_path = get_endpoint_path(endpoint.docs());
-                let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
-                let endpoint_inputs = get_endpoint_inputs(endpoint.inputs());
-                let endpoint_outputs = get_endpoint_outputs(endpoint.outputs());
-
-                if pages_props.contains_key(&(
-                    endpoint_path.folder.clone(),
-                    endpoint_path.page_name.clone(),
-                )) {
-                    let EndpointPath { folder, page_name } = endpoint_path.clone();
-
-                    if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
-                        _endpoint_props.push(EndpointProps {
-                            mutability: "readonly".to_string(),
-                            name: endpoint.name().to_string(),
-                            import_export_name: endpoint_hook_name,
-                            file_name: endpoint_file_name,
-                            inputs: endpoint_inputs,
-                            outputs: endpoint_outputs,
-                        });
-                    }
-                } else {
-                    let EndpointPath { folder, page_name } = endpoint_path.clone();
-                    let mut endpoints_props = Vec::<EndpointProps>::new();
-
-                    endpoints_props.push(EndpointProps {
-                        mutability: "readonly".to_string(),
-                        name: endpoint.name().to_string(),
-                        import_export_name: endpoint_hook_name,
-                        file_name: endpoint_file_name,
-                        inputs: endpoint_inputs,
-                        outputs: endpoint_outputs,
-                    });
-
-                    pages_props.insert((folder, page_name), endpoints_props);
-                }
+                format!("use{}", endpoint_name)
             }
+        };
+        let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
+        let endpoint_inputs = get_endpoint_inputs(endpoint.inputs());
+        let endpoint_outputs = get_endpoint_outputs(endpoint.outputs());
+        let endpoint_path = get_endpoint_path(endpoint.docs());
+
+        if pages_props.contains_key(&(
+            endpoint_path.folder.clone(),
+            endpoint_path.page_name.clone(),
+        )) {
+            let EndpointPath { folder, page_name } = endpoint_path.clone();
+
+            if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
+                _endpoint_props.push(EndpointProps {
+                    mutability: match endpoint.mutability() {
+                        Mutability::Mutable => "mutable".to_string(),
+                        Mutability::Readonly => "readonly".to_string(),
+                    },
+                    name: endpoint.name().to_string(),
+                    import_export_name,
+                    file_name: endpoint_file_name,
+                    inputs: endpoint_inputs,
+                    outputs: endpoint_outputs,
+                });
+            }
+        } else {
+            let EndpointPath { folder, page_name } = endpoint_path.clone();
+            let mut endpoints_props = Vec::<EndpointProps>::new();
+
+            endpoints_props.push(EndpointProps {
+                mutability: match endpoint.mutability() {
+                    Mutability::Mutable => "mutable".to_string(),
+                    Mutability::Readonly => "readonly".to_string(),
+                },
+                name: endpoint.name().to_string(),
+                import_export_name,
+                file_name: endpoint_file_name,
+                inputs: endpoint_inputs,
+                outputs: endpoint_outputs,
+            });
+
+            pages_props.insert((folder, page_name), endpoints_props);
         }
     }
 
