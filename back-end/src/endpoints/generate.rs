@@ -10,7 +10,6 @@ use zip::write::FileOptions;
 use zip::ZipWriter;
 
 use crate::analysis::endpoints::{get_readonly_endpoints_props, ReadonlyEndpointProps};
-use crate::models::sc_abi::endpoint::Mutability;
 use crate::models::sc_abi::sc_abi::SCAbi;
 use crate::rendering::{mutable_endpoint, page, readonly_endpoint, routes};
 
@@ -121,8 +120,8 @@ fn add_readonly_endpoints_files(
 
     for ((folder, page_name), ep_props) in &mut *endpoints_props {
         for props in &mut *ep_props {
-            match props.mutability {
-                Mutability::Mutable => {
+            match props.mutability.as_str() {
+                "mutable" => {
                     let rendered_endpoint = mutable_endpoint::render(
                         &props.hook_name,
                         &props.name,
@@ -138,7 +137,7 @@ fn add_readonly_endpoints_files(
                         .unwrap();
                     zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
                 }
-                Mutability::Readonly => {
+                "readonly" => {
                     let rendered_endpoint = readonly_endpoint::render(
                         &props.hook_name,
                         &props.name,
@@ -151,6 +150,7 @@ fn add_readonly_endpoints_files(
                         .unwrap();
                     zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
                 }
+                _ => {}
             }
         }
 

@@ -8,7 +8,7 @@ use crate::utils::string_mutation::StringMutation;
 
 #[derive(Debug)]
 pub struct ReadonlyEndpointProps {
-    pub mutability: Mutability,
+    pub mutability: String,
     pub name: String,
     pub hook_name: String,
     pub file_name: String,
@@ -64,7 +64,7 @@ pub fn get_readonly_endpoints_props(
 
                     if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
                         _endpoint_props.push(ReadonlyEndpointProps {
-                            mutability: Mutability::Mutable,
+                            mutability: "mutable".to_string(),
                             name: endpoint.name().to_string(),
                             hook_name: component_name,
                             file_name: endpoint_file_name,
@@ -77,7 +77,7 @@ pub fn get_readonly_endpoints_props(
                     let mut endpoints_props = Vec::<ReadonlyEndpointProps>::new();
 
                     endpoints_props.push(ReadonlyEndpointProps {
-                        mutability: Mutability::Mutable,
+                        mutability: "mutable".to_string(),
                         name: endpoint.name().to_string(),
                         hook_name: component_name,
                         file_name: endpoint_file_name,
@@ -110,7 +110,7 @@ pub fn get_readonly_endpoints_props(
 
                     if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
                         _endpoint_props.push(ReadonlyEndpointProps {
-                            mutability: Mutability::Readonly,
+                            mutability: "readonly".to_string(),
                             name: endpoint.name().to_string(),
                             hook_name: endpoint_hook_name,
                             file_name: endpoint_file_name,
@@ -123,7 +123,7 @@ pub fn get_readonly_endpoints_props(
                     let mut endpoints_props = Vec::<ReadonlyEndpointProps>::new();
 
                     endpoints_props.push(ReadonlyEndpointProps {
-                        mutability: Mutability::Readonly,
+                        mutability: "readonly".to_string(),
                         name: endpoint.name().to_string(),
                         hook_name: endpoint_hook_name,
                         file_name: endpoint_file_name,
