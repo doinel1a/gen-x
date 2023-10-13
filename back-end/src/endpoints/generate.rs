@@ -9,7 +9,7 @@ use std::path::Path;
 use zip::write::FileOptions;
 use zip::ZipWriter;
 
-use crate::analysis::endpoints::{get_readonly_endpoints_props, EndpointProps};
+use crate::analysis::endpoints::{get_endpoints_props, EndpointProps};
 use crate::models::sc_abi::sc_abi::SCAbi;
 use crate::rendering::{mutable_endpoint, page, readonly_endpoint, routes};
 
@@ -30,7 +30,7 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
     let sc_abi = &body.sc_abi;
     let sc_name = body.sc_abi.name();
     let endpoints = body.sc_abi.endpoints();
-    let mut endpoints_props = get_readonly_endpoints_props(endpoints);
+    let mut endpoints_props = get_endpoints_props(endpoints);
 
     let _ = add_dapp_bootstrapper_files(
         Path::new(&DAPP_BOOTSTRAPPER_URI),
@@ -41,7 +41,7 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
 
     let _ = add_sc_abi_file(&sc_abi, &mut zip_writer, zip_options)?;
 
-    let _ = add_readonly_endpoints_files(&mut endpoints_props, &mut zip_writer, zip_options)?;
+    let _ = add_pages_and_endpoints_files(&mut endpoints_props, &mut zip_writer, zip_options)?;
 
     let end_cursor = zip_writer.finish().unwrap();
     let zip_buffer = end_cursor.into_inner();
@@ -102,36 +102,36 @@ fn add_sc_abi_file(
     Ok(())
 }
 
-fn add_readonly_endpoints_files(
+fn add_pages_and_endpoints_files(
     endpoints_props: &mut HashMap<(String, String), Vec<EndpointProps>>,
     zip_writer: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
     zip_options: FileOptions,
 ) -> Result<(), std::io::Error> {
-    let does_page_contain_dashboard = endpoints_props
+    let does_pages_contain_dashboard = endpoints_props
         .keys()
         .any(|(_, page_name)| page_name == "dashboard");
 
-    if !does_page_contain_dashboard {
+    if !does_pages_contain_dashboard {
         endpoints_props.insert(
             ("/pages".to_string(), "dashboard".to_string()),
             Vec::<EndpointProps>::new(),
         );
     }
 
-    for ((folder, page_name), ep_props) in &mut *endpoints_props {
-        for props in &mut *ep_props {
-            match props.mutability.as_str() {
+    for ((folder, page_name), props) in &mut *endpoints_props {
+        for prop in &mut *props {
+            match prop.mutability.as_str() {
                 "mutable" => {
                     let rendered_endpoint = mutable_endpoint::render(
-                        &props.import_export_name,
-                        &props.name,
-                        &props.inputs,
-                        &props.outputs,
+                        &prop.import_export_name,
+                        &prop.name,
+                        &prop.inputs,
+                        &prop.outputs,
                     );
 
                     zip_writer
                         .start_file(
-                            format!("src/components/endpoints/{}.tsx", &props.file_name),
+                            format!("src/components/endpoints/{}.tsx", &prop.file_name),
                             zip_options,
                         )
                         .unwrap();
@@ -139,14 +139,14 @@ fn add_readonly_endpoints_files(
                 }
                 "readonly" => {
                     let rendered_endpoint = readonly_endpoint::render(
-                        &props.import_export_name,
-                        &props.name,
-                        &props.inputs,
-                        &props.outputs,
+                        &prop.import_export_name,
+                        &prop.name,
+                        &prop.inputs,
+                        &prop.outputs,
                     );
 
                     zip_writer
-                        .start_file(format!("src/hooks/{}.ts", &props.file_name), zip_options)
+                        .start_file(format!("src/hooks/{}.ts", &prop.file_name), zip_options)
                         .unwrap();
                     zip_writer.write_all(rendered_endpoint.as_bytes()).unwrap();
                 }
@@ -155,7 +155,7 @@ fn add_readonly_endpoints_files(
         }
 
         if !folder.is_empty() && !page_name.is_empty() {
-            let rendered_page = page::render(&page_name, &ep_props);
+            let rendered_page = page::render(&page_name, &props);
 
             zip_writer
                 .start_file(format!("src{}/{}.tsx", folder, page_name), zip_options)

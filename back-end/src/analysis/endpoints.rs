@@ -31,7 +31,7 @@ pub struct EndpointIO {
     pub args_serializer: String,
 }
 
-pub fn get_readonly_endpoints_props(
+pub fn get_endpoints_props(
     endpoints: &Vec<Endpoint>,
 ) -> HashMap<(String, String), Vec<EndpointProps>> {
     let mut pages_props: HashMap<(String, String), Vec<EndpointProps>> = Default::default();
@@ -44,10 +44,10 @@ pub fn get_readonly_endpoints_props(
                     .to_string()
                     .snake_to_camel_case()
                     .capitalize_first_letter();
-                let endpoint_path = get_readonly_endpoint_path(endpoint.docs());
+                let endpoint_path = get_endpoint_path(endpoint.docs());
                 let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
-                let endpoint_inputs = get_readonly_endpoint_inputs(endpoint.inputs());
-                let endpoint_outputs = get_readonly_endpoints_outputs(endpoint.outputs());
+                let endpoint_inputs = get_endpoint_inputs(endpoint.inputs());
+                let endpoint_outputs = get_endpoint_outputs(endpoint.outputs());
 
                 if pages_props.contains_key(&(
                     endpoint_path.folder.clone(),
@@ -90,10 +90,10 @@ pub fn get_readonly_endpoints_props(
                         .snake_to_camel_case()
                         .capitalize_first_letter()
                 );
-                let endpoint_path = get_readonly_endpoint_path(endpoint.docs());
+                let endpoint_path = get_endpoint_path(endpoint.docs());
                 let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
-                let endpoint_inputs = get_readonly_endpoint_inputs(endpoint.inputs());
-                let endpoint_outputs = get_readonly_endpoints_outputs(endpoint.outputs());
+                let endpoint_inputs = get_endpoint_inputs(endpoint.inputs());
+                let endpoint_outputs = get_endpoint_outputs(endpoint.outputs());
 
                 if pages_props.contains_key(&(
                     endpoint_path.folder.clone(),
@@ -133,7 +133,7 @@ pub fn get_readonly_endpoints_props(
     pages_props
 }
 
-fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> EndpointPath {
+fn get_endpoint_path(docs: &Option<Vec<String>>) -> EndpointPath {
     let mut folder = String::new();
     let mut page_name = String::new();
 
@@ -180,7 +180,7 @@ fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> EndpointPath {
     }
 }
 
-fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
+fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
     let mut endpoint_inputs = Vec::<EndpointIO>::new();
 
     for input in inputs {
@@ -384,7 +384,7 @@ fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
     endpoint_inputs
 }
 
-fn get_readonly_endpoints_outputs(outputs: &Vec<Output>) -> Vec<EndpointIO> {
+fn get_endpoint_outputs(outputs: &Vec<Output>) -> Vec<EndpointIO> {
     let mut endpoint_outputs = Vec::<EndpointIO>::new();
 
     for output in outputs {
