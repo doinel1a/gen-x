@@ -13,7 +13,7 @@ pub struct EndpointProps {
     pub hook_name: String,
     pub file_name: String,
     pub inputs: Vec<EndpointInput>,
-    pub outputs: Vec<ReadonlyEndpointOutput>,
+    pub outputs: Vec<EndpointOutput>,
 }
 
 #[derive(Clone, Debug)]
@@ -31,7 +31,7 @@ pub struct EndpointInput {
 }
 
 #[derive(Debug)]
-pub struct ReadonlyEndpointOutput {
+pub struct EndpointOutput {
     pub getter: String,
     pub setter: String,
     pub type_: String,
@@ -297,19 +297,19 @@ fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointInput> {
     endpoint_inputs
 }
 
-fn get_readonly_endpoints_outputs(outputs: &Vec<Output>) -> Vec<ReadonlyEndpointOutput> {
-    let mut endpoint_outputs = Vec::<ReadonlyEndpointOutput>::new();
+fn get_readonly_endpoints_outputs(outputs: &Vec<Output>) -> Vec<EndpointOutput> {
+    let mut endpoint_outputs = Vec::<EndpointOutput>::new();
 
     for output in outputs {
         match output.type_().as_str() {
-            "Address" => endpoint_outputs.push(ReadonlyEndpointOutput {
+            "Address" => endpoint_outputs.push(EndpointOutput {
                 getter: "address".to_string(),
                 setter: "setAddress".to_string(),
                 type_: "string".to_string(),
                 initial_value: "\"\"".to_string(),
             }),
             "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
-                endpoint_outputs.push(ReadonlyEndpointOutput {
+                endpoint_outputs.push(EndpointOutput {
                     getter: "numb".to_string(),
                     setter: "setNumb".to_string(),
                     type_: "number".to_string(),
@@ -317,74 +317,68 @@ fn get_readonly_endpoints_outputs(outputs: &Vec<Output>) -> Vec<ReadonlyEndpoint
                 })
             }
             "isize" | "i8" | "i16" | "i32" | "i64" | "BigInt" => {
-                endpoint_outputs.push(ReadonlyEndpointOutput {
+                endpoint_outputs.push(EndpointOutput {
                     getter: "numb".to_string(),
                     setter: "setNumb".to_string(),
                     type_: "number".to_string(),
                     initial_value: "0".to_string(),
                 })
             }
-            "bytes" | "utf-8 string" => endpoint_outputs.push(ReadonlyEndpointOutput {
+            "bytes" | "utf-8 string" => endpoint_outputs.push(EndpointOutput {
                 getter: "str".to_string(),
                 setter: "setStr".to_string(),
                 type_: "string".to_string(),
                 initial_value: "0".to_string(),
             }),
-            "bool" => endpoint_outputs.push(ReadonlyEndpointOutput {
+            "bool" => endpoint_outputs.push(EndpointOutput {
                 getter: "bool".to_string(),
                 setter: "setBool".to_string(),
                 type_: "boolean".to_string(),
                 initial_value: "false".to_string(),
             }),
-            "List<Address>" | "variadic<Address>" => {
-                endpoint_outputs.push(ReadonlyEndpointOutput {
-                    getter: "arrayAddress".to_string(),
-                    setter: "setArrayAddress".to_string(),
-                    type_: "string[]".to_string(),
-                    initial_value: "[]".to_string(),
-                })
-            }
+            "List<Address>" | "variadic<Address>" => endpoint_outputs.push(EndpointOutput {
+                getter: "arrayAddress".to_string(),
+                setter: "setArrayAddress".to_string(),
+                type_: "string[]".to_string(),
+                initial_value: "[]".to_string(),
+            }),
             "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
-            | "List<BigUint>" => endpoint_outputs.push(ReadonlyEndpointOutput {
+            | "List<BigUint>" => endpoint_outputs.push(EndpointOutput {
                 getter: "arrayNumber".to_string(),
                 setter: "setArrayNumber".to_string(),
                 type_: "number[]".to_string(),
                 initial_value: "[]".to_string(),
             }),
             "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
-            | "variadic<u64>" | "variadic<BigUint>" => {
-                endpoint_outputs.push(ReadonlyEndpointOutput {
-                    getter: "arrayNumber".to_string(),
-                    setter: "setArrayNumber".to_string(),
-                    type_: "number[]".to_string(),
-                    initial_value: "[]".to_string(),
-                })
-            }
+            | "variadic<u64>" | "variadic<BigUint>" => endpoint_outputs.push(EndpointOutput {
+                getter: "arrayNumber".to_string(),
+                setter: "setArrayNumber".to_string(),
+                type_: "number[]".to_string(),
+                initial_value: "[]".to_string(),
+            }),
             "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
-            | "List<BigInt>" => endpoint_outputs.push(ReadonlyEndpointOutput {
+            | "List<BigInt>" => endpoint_outputs.push(EndpointOutput {
                 getter: "arrayNumber".to_string(),
                 setter: "setArrayNumber".to_string(),
                 type_: "number[]".to_string(),
                 initial_value: "[]".to_string(),
             }),
             "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
-            | "variadic<i64>" | "variadic<BigInt>" => {
-                endpoint_outputs.push(ReadonlyEndpointOutput {
-                    getter: "arrayNumber".to_string(),
-                    setter: "setArrayNumber".to_string(),
-                    type_: "number[]".to_string(),
-                    initial_value: "[]".to_string(),
-                })
-            }
+            | "variadic<i64>" | "variadic<BigInt>" => endpoint_outputs.push(EndpointOutput {
+                getter: "arrayNumber".to_string(),
+                setter: "setArrayNumber".to_string(),
+                type_: "number[]".to_string(),
+                initial_value: "[]".to_string(),
+            }),
             "List<bytes>" | "List<utf-8 string>" | "variadic<bytes>" | "variadic<utf-8 string>" => {
-                endpoint_outputs.push(ReadonlyEndpointOutput {
+                endpoint_outputs.push(EndpointOutput {
                     getter: "arrayString".to_string(),
                     setter: "setArrayString".to_string(),
                     type_: "string[]".to_string(),
                     initial_value: "[]".to_string(),
                 })
             }
-            "List<bool>" | "variadic<bool>" => endpoint_outputs.push(ReadonlyEndpointOutput {
+            "List<bool>" | "variadic<bool>" => endpoint_outputs.push(EndpointOutput {
                 getter: "arrayBool".to_string(),
                 setter: "setArrayBool".to_string(),
                 type_: "boolean[]".to_string(),
