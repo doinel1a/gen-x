@@ -109,7 +109,7 @@ export default function {{ hook_name }}(
       {% endif %}
 
 		} catch (error) {
-			console.error('Unable to call getCounter endpoint', error);
+			console.error('Unable to call "{{ endpoint_name }}" endpoint', error);
 		}
 	}
 

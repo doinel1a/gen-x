@@ -18,19 +18,13 @@ export default function {{ title }}() {
     {% if endpoints.len() > 0 %}
       {%- for endpoint in endpoints -%}
         {% if endpoint.mutability == "readonly" %}
-          {% if endpoint.outputs.len() == 0 %}
-            const response = 
-          {% else if endpoint.outputs.len() > 0 %}
+          {% if endpoint.outputs.len() == 0 || endpoint.outputs.len() == 1 %}
+            const {{ endpoint.name.to_string().snake_to_camel_case() }} = 
+          {% else if endpoint.outputs.len() > 1 %}
             const {
-              {% if endpoint.outputs.len() == 1 %}
-                {%- for output in endpoint.outputs -%}
-                  {{ endpoint.import_export_name }}{{ output.getter }}{{ loop.index }},
-                {% endfor %}
-              {% else %}
-                {%- for output in endpoint.outputs -%}
-                  {{ endpoint.import_export_name }}{{ output.getter }}{{ loop.index }},
-                {% endfor %}
-              {% endif %}
+              {%- for output in endpoint.outputs -%}
+                {{ output.getter }}{{ loop.index }},
+              {% endfor %}
             } = 
           {% endif %}
             {{ endpoint.import_export_name }}(
@@ -51,17 +45,17 @@ export default function {{ title }}() {
           {% if endpoints.len() > 0 %}
             {%- for endpoint in endpoints -%}
               {% if endpoint.mutability == "readonly" %}
-                {% if endpoint.outputs.len() == 0 %}
+                {% if endpoint.outputs.len() == 0 || endpoint.outputs.len() == 1 %}
                   <div className="flex flex-col items-center justify-center p-2">
-                    <p>{{ endpoint.import_export_name }}Response</p>
-                    <span>{ response }</span>
+                    <p>{{ endpoint.import_export_name }} response</p>
+                    <span>{ {{ endpoint.name.to_string().snake_to_camel_case() }} }</span>
                   </div>
-                {% else if endpoint.outputs.len() > 0 %}
+                {% else if endpoint.outputs.len() > 1 %}
                   {%- for output in endpoint.outputs -%}
                     <div className="flex flex-col items-center justify-center p-2">
-                      <p>{{ endpoint.import_export_name }}Response:</p>
+                      <p>{{ endpoint.import_export_name }} response:</p>
                       <span>
-                        { {{ endpoint.import_export_name }}{{ output.getter }}{{ loop.index }} }
+                        { {{ output.getter }}{{ loop.index }} }
                       </span>
                     </div>
                   {% endfor %}

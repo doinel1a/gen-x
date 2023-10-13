@@ -7,7 +7,7 @@ import Container from '../container';
 import 
 	React 
 	{% if inputs.len() > 0 %}
-		, { useState } 
+		,{ useState } 
 	{% endif %}
 from 'react';
 
@@ -20,35 +20,34 @@ from 'react';
 {% endif %}
 
 
-export default function {{component_name}}Endpoint() {
+export default function {{ component_name }}Endpoint() {
 	{% if inputs.len() > 0 %}
 		{% for input in inputs %}
 			const [
-				{{ input.getter }}{{ loop.index }}, 
-				{{ input.setter }}{{ loop.index }}
+				{{ input.getter }}, {{ input.setter }}
 			] = useState<{{input.type_}}>({{ input.initial_value }});
 		{% endfor %}
 	{% endif %}
 
 	return (
-		<Container id="{{ endpoint_name }}-endpoint" title="{{ endpoint_name }} endpoint">
+		<Container id="{{ endpoint_name }}-endpoint" title="{{ endpoint_name.snake_to_camel_case() }} endpoint">
 			{% if inputs.len() > 0 %}
 				{% for input in inputs %}
 					{% if input.type_.contains("number") %}
 						<NumericInput
-							id="increment"
-							label="Increment value"
-							placeholder="Insert increment value"
-							value={ {{ input.getter }}{{ loop.index }} }
-							setValue={ {{ input.setter }}{{ loop.index }} }
+							id="{{ input.getter }}"
+							label="{{ input.getter.snake_to_camel_case().capitalize_first_letter() }} value"
+							placeholder="Insert {{ input.getter }} value"
+							value={ {{ input.getter }} }
+							setValue={ {{ input.setter }} }
 						/>
 					{% else if input.type_.contains("string") %}
 						<TextInput
-							id="increment"
-							label="Increment value"
-							placeholder="Insert increment value"
-							value={ {{ input.getter }}{{ loop.index }} }
-							setValue={ {{ input.setter }}{{ loop.index }} }
+							id="{{ input.getter }}"
+							label="{{ input.getter.snake_to_camel_case().capitalize_first_letter() }} value"
+							placeholder="Insert {{ input.getter }} value"
+							value={ {{ input.getter }} }
+							setValue={ {{ input.setter }} }
 						/>
 					{% endif %}
 				{% endfor %}
@@ -59,7 +58,7 @@ export default function {{component_name}}Endpoint() {
 				onClick={() => sendTransaction(
 					{% if inputs.len() > 0 %}
 						{% for input in inputs %}
-							{{ input.getter }}{{ loop.index }}, 
+							{{ input.getter }}, 
 						{% endfor %}
 					{% endif %}
 				)}
@@ -73,7 +72,7 @@ export default function {{component_name}}Endpoint() {
 async function sendTransaction(
 	{% if inputs.len() > 0 %}
 		{% for input in inputs %}
-			{{ input.getter }}{{ loop.index }}: {{ input.type_ }}, 
+			{{ input.getter }}: {{ input.type_ }}, 
 		{% endfor %}
 	{% endif %}
 ) {

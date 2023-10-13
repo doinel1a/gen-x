@@ -1,6 +1,7 @@
 use askama::Template;
 
 use crate::analysis::endpoints::EndpointIO;
+use crate::utils::string_mutation::StringMutation;
 
 #[derive(Template)]
 #[template(path = "mutable-endpoint.ts", escape = "none")]
@@ -21,6 +22,7 @@ pub fn render(
 ) -> String {
     let does_inputs_include_string = inputs.iter().any(|input| input.type_ == "string");
     let does_inputs_include_number = inputs.iter().any(|input| input.type_ == "number");
+
     let template = ReadonlyEndpointTemplate {
         component_name,
         endpoint_name,
