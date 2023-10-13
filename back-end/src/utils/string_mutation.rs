@@ -28,9 +28,21 @@ impl StringMutation for String {
     }
 
     fn snake_to_camel_case(&self) -> String {
-        self.trim_matches('_').to_string();
+        let trimmed = self.trim_matches('_');
+        let mut split = trimmed.split('_');
 
-        self.split('_')
+        let first_word = match split.next() {
+            Some(word) => {
+                let mut chars = word.chars();
+                match chars.next() {
+                    Some(first) => first.to_lowercase().collect::<String>() + chars.as_str(),
+                    None => String::new(),
+                }
+            }
+            None => String::new(),
+        };
+
+        let rest = split
             .map(|word| {
                 let mut chars = word.chars();
                 match chars.next() {
@@ -39,7 +51,13 @@ impl StringMutation for String {
                 }
             })
             .collect::<Vec<String>>()
-            .join("")
+            .join("");
+
+        if first_word.is_empty() {
+            rest
+        } else {
+            first_word + &rest
+        }
     }
 
     fn snake_to_kebab_case(&self) -> String {
