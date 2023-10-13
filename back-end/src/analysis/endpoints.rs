@@ -17,7 +17,7 @@ pub struct EndpointProps {
 }
 
 #[derive(Clone, Debug)]
-pub struct ReadonlyEndpointPath {
+pub struct EndpointPath {
     pub folder: String,
     pub page_name: String,
 }
@@ -60,7 +60,7 @@ pub fn get_readonly_endpoints_props(
                     endpoint_path.folder.clone(),
                     endpoint_path.page_name.clone(),
                 )) {
-                    let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
+                    let EndpointPath { folder, page_name } = endpoint_path.clone();
 
                     if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
                         _endpoint_props.push(EndpointProps {
@@ -73,7 +73,7 @@ pub fn get_readonly_endpoints_props(
                         });
                     }
                 } else {
-                    let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
+                    let EndpointPath { folder, page_name } = endpoint_path.clone();
                     let mut endpoints_props = Vec::<EndpointProps>::new();
 
                     endpoints_props.push(EndpointProps {
@@ -106,7 +106,7 @@ pub fn get_readonly_endpoints_props(
                     endpoint_path.folder.clone(),
                     endpoint_path.page_name.clone(),
                 )) {
-                    let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
+                    let EndpointPath { folder, page_name } = endpoint_path.clone();
 
                     if let Some(_endpoint_props) = pages_props.get_mut(&(folder, page_name)) {
                         _endpoint_props.push(EndpointProps {
@@ -119,7 +119,7 @@ pub fn get_readonly_endpoints_props(
                         });
                     }
                 } else {
-                    let ReadonlyEndpointPath { folder, page_name } = endpoint_path.clone();
+                    let EndpointPath { folder, page_name } = endpoint_path.clone();
                     let mut endpoints_props = Vec::<EndpointProps>::new();
 
                     endpoints_props.push(EndpointProps {
@@ -140,7 +140,7 @@ pub fn get_readonly_endpoints_props(
     pages_props
 }
 
-fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> ReadonlyEndpointPath {
+fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> EndpointPath {
     let mut folder = String::new();
     let mut page_name = String::new();
 
@@ -175,13 +175,13 @@ fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> ReadonlyEndpointPat
                 }
 
                 if !folder.is_empty() && !page_name.is_empty() {
-                    return ReadonlyEndpointPath { folder, page_name };
+                    return EndpointPath { folder, page_name };
                 }
             }
         }
     }
 
-    ReadonlyEndpointPath {
+    EndpointPath {
         folder: "".to_string(),
         page_name: "".to_string(),
     }
