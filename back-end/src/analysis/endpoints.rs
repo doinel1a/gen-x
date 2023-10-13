@@ -12,7 +12,7 @@ pub struct EndpointProps {
     pub name: String,
     pub hook_name: String,
     pub file_name: String,
-    pub inputs: Vec<ReadonlyEndpointInput>,
+    pub inputs: Vec<EndpointInput>,
     pub outputs: Vec<ReadonlyEndpointOutput>,
 }
 
@@ -23,7 +23,7 @@ pub struct EndpointPath {
 }
 
 #[derive(Debug)]
-pub struct ReadonlyEndpointInput {
+pub struct EndpointInput {
     pub name: String,
     pub type_: String,
     pub initial_value: String,
@@ -187,19 +187,19 @@ fn get_readonly_endpoint_path(docs: &Option<Vec<String>>) -> EndpointPath {
     }
 }
 
-fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<ReadonlyEndpointInput> {
-    let mut endpoint_inputs = Vec::<ReadonlyEndpointInput>::new();
+fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointInput> {
+    let mut endpoint_inputs = Vec::<EndpointInput>::new();
 
     for input in inputs {
         match input.type_().as_str() {
-            "Address" => endpoint_inputs.push(ReadonlyEndpointInput {
+            "Address" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "string".to_string(),
                 initial_value: "\"\"".to_string(),
                 args_serializer: "AddressValue".to_string(),
             }),
             "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
-                endpoint_inputs.push(ReadonlyEndpointInput {
+                endpoint_inputs.push(EndpointInput {
                     name: input.name().to_string().snake_to_camel_case(),
                     type_: "number".to_string(),
                     initial_value: "0".to_string(),
@@ -215,7 +215,7 @@ fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<ReadonlyEndpointInpu
                 })
             }
             "isize" | "i8" | "i16" | "i32" | "i64" | "BigInt" => {
-                endpoint_inputs.push(ReadonlyEndpointInput {
+                endpoint_inputs.push(EndpointInput {
                     name: input.name().to_string().snake_to_camel_case(),
                     type_: "number".to_string(),
                     initial_value: "0".to_string(),
@@ -230,63 +230,61 @@ fn get_readonly_endpoint_inputs(inputs: &Vec<Field>) -> Vec<ReadonlyEndpointInpu
                     },
                 })
             }
-            "bytes" | "utf-8 string" => endpoint_inputs.push(ReadonlyEndpointInput {
+            "bytes" | "utf-8 string" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "string".to_string(),
                 initial_value: "\"\"".to_string(),
                 args_serializer: "BytesValue".to_string(),
             }),
-            "bool" => endpoint_inputs.push(ReadonlyEndpointInput {
+            "bool" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "boolean".to_string(),
                 initial_value: "false".to_string(),
                 args_serializer: "BooleanValue".to_string(),
             }),
-            "List<Address>" | "variadic<Address>" => endpoint_inputs.push(ReadonlyEndpointInput {
+            "List<Address>" | "variadic<Address>" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "string[]".to_string(),
                 initial_value: "[\"\"]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
-            | "List<BigUint>" => endpoint_inputs.push(ReadonlyEndpointInput {
+            | "List<BigUint>" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "number[]".to_string(),
                 initial_value: "[0]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
-            | "variadic<u64>" | "variadic<BigUint>" => {
-                endpoint_inputs.push(ReadonlyEndpointInput {
-                    name: input.name().to_string().snake_to_camel_case(),
-                    type_: "number[]".to_string(),
-                    initial_value: "[0]".to_string(),
-                    args_serializer: "".to_string(),
-                })
-            }
+            | "variadic<u64>" | "variadic<BigUint>" => endpoint_inputs.push(EndpointInput {
+                name: input.name().to_string().snake_to_camel_case(),
+                type_: "number[]".to_string(),
+                initial_value: "[0]".to_string(),
+                args_serializer: "".to_string(),
+            }),
             "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
-            | "List<BigInt>" => endpoint_inputs.push(ReadonlyEndpointInput {
+            | "List<BigInt>" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "number[]".to_string(),
                 initial_value: "[0]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
-            | "variadic<i64>" | "variadic<BigInt>" => endpoint_inputs.push(ReadonlyEndpointInput {
+            | "variadic<i64>" | "variadic<BigInt>" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "number[]".to_string(),
                 initial_value: "[0]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "List<bytes>" | "List<utf-8 string>" | "variadic<bytes>" | "variadic<utf-8 string>" => {
-                endpoint_inputs.push(ReadonlyEndpointInput {
+                endpoint_inputs.push(EndpointInput {
                     name: input.name().to_string().snake_to_camel_case(),
                     type_: "string[]".to_string(),
                     initial_value: "[\"\"]".to_string(),
                     args_serializer: "".to_string(),
                 })
             }
-            "List<bool>" | "variadic<bool>" => endpoint_inputs.push(ReadonlyEndpointInput {
+            "List<bool>" | "variadic<bool>" => endpoint_inputs.push(EndpointInput {
                 name: input.name().to_string().snake_to_camel_case(),
                 type_: "boolean[]".to_string(),
                 initial_value: "[false]".to_string(),
