@@ -1,12 +1,18 @@
 import { useGetNetworkConfig } from '@multiversx/sdk-dapp/hooks';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { useEffect, useState } from 'react';
 import contract from '../contracts/contract';
+
+import {
+    useEffect
+    {% if outputs.len() > 0 %}
+      , useState
+	  {% endif %}
+} from 'react';
 
 import { 
   ContractFunction, 
   ResultsParser
-  {% if does_outputs_includes_address %}
+  {% if does_outputs_include_address %}
     , Address
   {% endif %}
 } from '@multiversx/sdk-core/out';
@@ -26,7 +32,7 @@ const resultsParser = new ResultsParser();
 export default function {{ hook_name }}(
   {% if inputs.len() > 0 %}
     {% for input in inputs %}
-      {{ input.name}}: {{ input.type_}},
+      {{ input.getter}}: {{ input.type_}},
     {% endfor %}
   {% endif %}
 ) {
@@ -50,7 +56,7 @@ export default function {{ hook_name }}(
           args: [
             {% for input in inputs %}
                 {% if input.args_serializer != "" %}
-                  new {{ input.args_serializer }}({{ input.name }}),
+                  new {{ input.args_serializer }}({{ input.getter }}),
                 {% endif %}
             {% endfor %}
           ]
@@ -103,7 +109,7 @@ export default function {{ hook_name }}(
       {% endif %}
 
 		} catch (error) {
-			console.error('Unable to call getCounter endpoint', error);
+			console.error('Unable to call "{{ endpoint_name }}" endpoint', error);
 		}
 	}
 

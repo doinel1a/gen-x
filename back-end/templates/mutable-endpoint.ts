@@ -1,41 +1,53 @@
 import { sendTransactions } from '@multiversx/sdk-dapp/services';
 import { refreshAccount } from '@multiversx/sdk-dapp/utils';
-import React, { useState } from 'react';
 import { contractAddress } from '../../config/devnet';
 import Button from '../button';
 import Container from '../container';
-import NumericInput from '../inputs/numeric-input';
-import TextInput from '../inputs/text-input';
 
-export default function {{component_name}}Endpoint() {
+import 
+	React 
+	{% if inputs.len() > 0 %}
+		,{ useState } 
+	{% endif %}
+from 'react';
+
+{% if does_inputs_include_string %}
+	import TextInput from '../inputs/text-input';
+{% endif %}
+
+{% if does_inputs_include_number %}
+	import NumericInput from '../inputs/numeric-input';
+{% endif %}
+
+
+export default function {{ component_name }}Endpoint() {
 	{% if inputs.len() > 0 %}
 		{% for input in inputs %}
 			const [
-				{{ input.name }}{{ loop.index }}, 
-				set{{ input.name }}{{ loop.index }}
+				{{ input.getter }}, {{ input.setter }}
 			] = useState<{{input.type_}}>({{ input.initial_value }});
 		{% endfor %}
 	{% endif %}
 
 	return (
-		<Container id="{{ endpoint_name }}-endpoint" title="{{ endpoint_name }} endpoint">
+		<Container id="{{ endpoint_name }}-endpoint" title="{{ endpoint_name.snake_to_camel_case() }} endpoint">
 			{% if inputs.len() > 0 %}
 				{% for input in inputs %}
 					{% if input.type_.contains("number") %}
 						<NumericInput
-							id="increment"
-							label="Increment value"
-							placeholder="Insert increment value"
-							value={ {{ input.name }}{{ loop.index }} }
-							setValue={ set{{ input.name }}{{ loop.index }} }
+							id="{{ input.getter }}"
+							label="{{ input.getter.snake_to_camel_case().capitalize_first_letter() }} value"
+							placeholder="Insert {{ input.getter }} value"
+							value={ {{ input.getter }} }
+							setValue={ {{ input.setter }} }
 						/>
 					{% else if input.type_.contains("string") %}
 						<TextInput
-							id="increment"
-							label="Increment value"
-							placeholder="Insert increment value"
-							value={ {{ input.name }}{{ loop.index }} }
-							setValue={ set{{ input.name }}{{ loop.index }} }
+							id="{{ input.getter }}"
+							label="{{ input.getter.snake_to_camel_case().capitalize_first_letter() }} value"
+							placeholder="Insert {{ input.getter }} value"
+							value={ {{ input.getter }} }
+							setValue={ {{ input.setter }} }
 						/>
 					{% endif %}
 				{% endfor %}
@@ -46,7 +58,7 @@ export default function {{component_name}}Endpoint() {
 				onClick={() => sendTransaction(
 					{% if inputs.len() > 0 %}
 						{% for input in inputs %}
-							{{ input.name }}{{ loop.index }}, 
+							{{ input.getter }}, 
 						{% endfor %}
 					{% endif %}
 				)}
@@ -60,7 +72,7 @@ export default function {{component_name}}Endpoint() {
 async function sendTransaction(
 	{% if inputs.len() > 0 %}
 		{% for input in inputs %}
-			{{ input.name }}{{ loop.index }}: {{ input.type_ }}, 
+			{{ input.getter }}: {{ input.type_ }}, 
 		{% endfor %}
 	{% endif %}
 ) {
