@@ -11,8 +11,8 @@ export default function {{component_name}}Endpoint() {
 	{% if inputs.len() > 0 %}
 		{% for input in inputs %}
 			const [
-				{{ input.name }}{{ loop.index }}, 
-				set{{ input.name }}{{ loop.index }}
+				{{ input.getter }}{{ loop.index }}, 
+				{{ input.setter }}{{ loop.index }}
 			] = useState<{{input.type_}}>({{ input.initial_value }});
 		{% endfor %}
 	{% endif %}
@@ -26,16 +26,16 @@ export default function {{component_name}}Endpoint() {
 							id="increment"
 							label="Increment value"
 							placeholder="Insert increment value"
-							value={ {{ input.name }}{{ loop.index }} }
-							setValue={ set{{ input.name }}{{ loop.index }} }
+							value={ {{ input.getter }}{{ loop.index }} }
+							setValue={ {{ input.setter }}{{ loop.index }} }
 						/>
 					{% else if input.type_.contains("string") %}
 						<TextInput
 							id="increment"
 							label="Increment value"
 							placeholder="Insert increment value"
-							value={ {{ input.name }}{{ loop.index }} }
-							setValue={ set{{ input.name }}{{ loop.index }} }
+							value={ {{ input.getter }}{{ loop.index }} }
+							setValue={ {{ input.setter }}{{ loop.index }} }
 						/>
 					{% endif %}
 				{% endfor %}
@@ -46,7 +46,7 @@ export default function {{component_name}}Endpoint() {
 				onClick={() => sendTransaction(
 					{% if inputs.len() > 0 %}
 						{% for input in inputs %}
-							{{ input.name }}{{ loop.index }}, 
+							{{ input.getter }}{{ loop.index }}, 
 						{% endfor %}
 					{% endif %}
 				)}
@@ -60,7 +60,7 @@ export default function {{component_name}}Endpoint() {
 async function sendTransaction(
 	{% if inputs.len() > 0 %}
 		{% for input in inputs %}
-			{{ input.name }}{{ loop.index }}: {{ input.type_ }}, 
+			{{ input.getter }}{{ loop.index }}: {{ input.type_ }}, 
 		{% endfor %}
 	{% endif %}
 ) {

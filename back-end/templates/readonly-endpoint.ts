@@ -26,7 +26,7 @@ const resultsParser = new ResultsParser();
 export default function {{ hook_name }}(
   {% if inputs.len() > 0 %}
     {% for input in inputs %}
-      {{ input.name}}: {{ input.type_}},
+      {{ input.getter}}: {{ input.type_}},
     {% endfor %}
   {% endif %}
 ) {
@@ -50,7 +50,7 @@ export default function {{ hook_name }}(
           args: [
             {% for input in inputs %}
                 {% if input.args_serializer != "" %}
-                  new {{ input.args_serializer }}({{ input.name }}),
+                  new {{ input.args_serializer }}({{ input.getter }}),
                 {% endif %}
             {% endfor %}
           ]

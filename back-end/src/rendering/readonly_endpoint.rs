@@ -1,9 +1,6 @@
 use askama::Template;
 
-use crate::{
-    analysis::endpoints::{EndpointInput, EndpointOutput},
-    utils::string_mutation::StringMutation,
-};
+use crate::{analysis::endpoints::EndpointIO, utils::string_mutation::StringMutation};
 
 #[derive(Template)]
 #[template(path = "readonly-endpoint.ts", escape = "none")]
@@ -12,15 +9,15 @@ struct ReadonlyEndpointTemplate<'a> {
     function_name: &'a String,
     endpoint_name: &'a String,
     does_outputs_includes_address: &'a bool,
-    inputs: &'a Vec<EndpointInput>,
-    outputs: &'a Vec<EndpointOutput>,
+    inputs: &'a Vec<EndpointIO>,
+    outputs: &'a Vec<EndpointIO>,
 }
 
 pub fn render(
     hook_name: &String,
     endpoint_name: &String,
-    inputs: &Vec<EndpointInput>,
-    outputs: &Vec<EndpointOutput>,
+    inputs: &Vec<EndpointIO>,
+    outputs: &Vec<EndpointIO>,
 ) -> String {
     let function_name = &endpoint_name.snake_to_camel_case();
     let does_outputs_includes_address = outputs
