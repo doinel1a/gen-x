@@ -1,11 +1,24 @@
 import { sendTransactions } from '@multiversx/sdk-dapp/services';
 import { refreshAccount } from '@multiversx/sdk-dapp/utils';
-import React, { useState } from 'react';
 import { contractAddress } from '../../config/devnet';
 import Button from '../button';
 import Container from '../container';
-import NumericInput from '../inputs/numeric-input';
-import TextInput from '../inputs/text-input';
+
+import 
+	React 
+	{% if inputs.len() > 0 %}
+		, { useState } 
+	{% endif %}
+from 'react';
+
+{% if does_inputs_include_string %}
+	import TextInput from '../inputs/text-input';
+{% endif %}
+
+{% if does_inputs_include_number %}
+	import NumericInput from '../inputs/numeric-input';
+{% endif %}
+
 
 export default function {{component_name}}Endpoint() {
 	{% if inputs.len() > 0 %}

@@ -1,12 +1,18 @@
 import { useGetNetworkConfig } from '@multiversx/sdk-dapp/hooks';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { useEffect, useState } from 'react';
 import contract from '../contracts/contract';
+
+import {
+    useEffect
+    {% if outputs.len() > 0 %}
+      , useState
+	  {% endif %}
+} from 'react';
 
 import { 
   ContractFunction, 
   ResultsParser
-  {% if does_outputs_includes_address %}
+  {% if does_outputs_include_address %}
     , Address
   {% endif %}
 } from '@multiversx/sdk-core/out';
