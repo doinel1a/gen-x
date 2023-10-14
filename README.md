@@ -157,8 +157,8 @@ The only way to test the solutions is to run it locally:
   - [x] Test generate endpoint to download .zip archive;
   - [x] Set listen address dynamically based on the environment;
   - [ ] Smart contract ABI:
-    - [ ] Address:
-      - [ ] Validation;
+    - [x] Address:
+      - [x] Validation;
     - [ ] Endpoints:
       - [x] Readonly:
         - [x] Render single endpoint w/ its inputs & outputs;
