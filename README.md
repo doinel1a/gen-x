@@ -173,7 +173,9 @@ The only way to test the solutions is to run it locally:
         - [x] Render & "assemble" endpoints in the specified page;
               **To enable this feature, insert in the documentation of each endpoint a field like `path: /pages/page1`**
         - [ ] Handle custom types - Struct & Enum;
-      - [ ] Custom types;
+    - [x] Custom types:
+      - [x] Struct;
+      - [x] Enum;
   - [x] Fix MultiversX sdk UI styling;
   - [x] Update [dApp boilerplate][dapp-boilerplate] to the last version;
 - **CI / CD**:
