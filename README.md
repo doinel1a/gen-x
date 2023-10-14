@@ -151,28 +151,43 @@ The only way to test the solutions is to run it locally:
 ## ✅ Todo
 
 - **Front-end**:
-  - [ ] Test healthcheck endpoint from front-end;
-  - [ ] Test generate endpoint from front-end;
-  - [ ] Set back-end url dynamically based on dev env;
-  - [ ] Display back-end errors in the UI;
+  - [ ] Integrate API:
+    - [ ] Display back-end errors in the UI;
 - **Back-end**:
   - [x] Test generate endpoint to download .zip archive;
   - [x] Set listen address dynamically based on the environment;
   - [ ] Smart contract ABI:
-    - [ ] Address;
+    - [ ] Address:
+      - [ ] Validation;
     - [ ] Endpoints:
       - [x] Readonly:
         - [x] Render single endpoint w/ its inputs & outputs;
         - [x] Render all endpoints;
         - [x] Render & "assemble" endpoints in the specified page; <br />
               **To enable this feature, insert in the documentation of each endpoint a field like `path: /pages/page1`**
-        - [ ] Handle custom types - Struct & Enum;
+        - [ ] Handle custom types - Struct & Enum:
+          - [ ] Input serialization:
+            - [ ] Base Rust types;
+            - [ ] Struct;
+            - [ ] Enums;
+          - [ ] Output deserialization:
+            - [ ] Base Rust types;
+            - [ ] Struct;
+            - [ ] Enums;
       - [x] Mutable:
         - [x] Render single endpoint w/ its inputs & outputs;
         - [x] Render all endpoints;
         - [x] Render & "assemble" endpoints in the specified page;
               **To enable this feature, insert in the documentation of each endpoint a field like `path: /pages/page1`**
-        - [ ] Handle custom types - Struct & Enum;
+        - [ ] Handle custom types - Struct & Enum:
+          - [ ] Input serialization:
+            - [ ] Base Rust types;
+            - [ ] Struct;
+            - [ ] Enums;
+          - [ ] Output deserialization:
+            - [ ] Base Rust types;
+            - [ ] Struct;
+            - [ ] Enums;
     - [x] Custom types:
       - [x] Struct;
       - [x] Enum;
