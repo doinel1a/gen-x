@@ -15,14 +15,16 @@ use crate::analysis::structs::get_custom_structs;
 use crate::models::sc_abi::field::Field;
 use crate::models::sc_abi::sc_abi::SCAbi;
 use crate::models::sc_abi::variant::Variant;
+use crate::models::sc_address::SCAddress;
 use crate::rendering::{
-    custom_enum, custom_struct, mutable_endpoint, page, readonly_endpoint, routes,
+    config, custom_enum, custom_struct, mutable_endpoint, page, readonly_endpoint, routes,
 };
 
 const DAPP_BOOTSTRAPPER_URI: &str = "dapp_bootstrapper";
 
 #[derive(Deserialize, Debug)]
 struct Body {
+    sc_address: SCAddress,
     sc_abi: SCAbi,
 }
 
@@ -33,10 +35,12 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
     let mut zip_writer = ZipWriter::new(buffer_cursor);
     let zip_options = FileOptions::default();
 
+    let sc_address = &body.sc_address.sc_address();
     let sc_abi = &body.sc_abi;
     let sc_name = body.sc_abi.name();
     let endpoints = body.sc_abi.endpoints();
     let types = body.sc_abi.types();
+
     let custom_structs = get_custom_structs(types);
     let custom_enums = get_custom_enums(types);
     let mut endpoints_props = get_endpoints_props(endpoints);
@@ -47,12 +51,10 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
         &mut zip_writer,
         zip_options,
     )?;
-
+    let _ = add_sc_address_file(&sc_address, &mut zip_writer, zip_options)?;
     let _ = add_sc_abi_file(&sc_abi, &mut zip_writer, zip_options)?;
-
     let _ = add_custom_structs_files(&custom_structs, &mut zip_writer, zip_options);
     let _ = add_custom_enums_files(&custom_enums, &mut zip_writer, zip_options);
-
     let _ = add_pages_and_endpoints_files(&mut endpoints_props, &mut zip_writer, zip_options)?;
 
     let end_cursor = zip_writer.finish().unwrap();
@@ -95,6 +97,21 @@ fn add_dapp_bootstrapper_files(
             add_dapp_bootstrapper_files(&root_dir, &path, zip_writer, zip_options)?;
         }
     }
+
+    Ok(())
+}
+
+fn add_sc_address_file(
+    sc_address: &String,
+    zip_writer: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
+    zip_options: FileOptions,
+) -> Result<(), std::io::Error> {
+    let rendered_config = config::render(sc_address);
+
+    zip_writer
+        .start_file("src/config/devnet.ts", zip_options)
+        .unwrap();
+    zip_writer.write_all(rendered_config.as_bytes()).unwrap();
 
     Ok(())
 }
