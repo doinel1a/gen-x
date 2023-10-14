@@ -16,3 +16,17 @@ pub enum CustomTypeType {
     Enum,
     Struct,
 }
+
+impl CustomType {
+    pub fn type_(&self) -> &CustomTypeType {
+        &self.type_
+    }
+
+    pub fn fields(&self) -> &Option<Vec<Field>> {
+        &self.fields
+    }
+
+    pub fn variants(&self) -> &Option<Vec<Variant>> {
+        &self.variants
+    }
+}
