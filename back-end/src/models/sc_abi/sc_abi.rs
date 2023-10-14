@@ -23,4 +23,8 @@ impl SCAbi {
     pub fn endpoints(&self) -> &Vec<Endpoint> {
         &self.endpoints
     }
+
+    pub fn types(&self) -> &HashMap<String, CustomType> {
+        &self.types
+    }
 }

@@ -10,8 +10,10 @@ use zip::write::FileOptions;
 use zip::ZipWriter;
 
 use crate::analysis::endpoints::{get_endpoints_props, EndpointProps};
+use crate::analysis::enums::get_custom_enums;
 use crate::models::sc_abi::sc_abi::SCAbi;
-use crate::rendering::{mutable_endpoint, page, readonly_endpoint, routes};
+use crate::models::sc_abi::variant::Variant;
+use crate::rendering::{custom_enum, mutable_endpoint, page, readonly_endpoint, routes};
 
 const DAPP_BOOTSTRAPPER_URI: &str = "dapp_bootstrapper";
 
@@ -30,6 +32,8 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
     let sc_abi = &body.sc_abi;
     let sc_name = body.sc_abi.name();
     let endpoints = body.sc_abi.endpoints();
+    let types = body.sc_abi.types();
+    let custom_enums = get_custom_enums(types);
     let mut endpoints_props = get_endpoints_props(endpoints);
 
     let _ = add_dapp_bootstrapper_files(
@@ -40,6 +44,8 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
     )?;
 
     let _ = add_sc_abi_file(&sc_abi, &mut zip_writer, zip_options)?;
+
+    let _ = add_custom_enums_files(&custom_enums, &mut zip_writer, zip_options);
 
     let _ = add_pages_and_endpoints_files(&mut endpoints_props, &mut zip_writer, zip_options)?;
 
@@ -98,6 +104,23 @@ fn add_sc_abi_file(
         .start_file("src/contracts-abi/contract.abi.json", zip_options)
         .unwrap();
     zip_writer.write_all(&abi_file.as_bytes()).unwrap();
+
+    Ok(())
+}
+
+fn add_custom_enums_files(
+    custom_enums: &HashMap<String, Vec<Variant>>,
+    zip_writer: &mut ZipWriter<Cursor<&mut Vec<u8>>>,
+    zip_options: FileOptions,
+) -> Result<(), std::io::Error> {
+    for (name, variants) in custom_enums {
+        let rendered_enum = custom_enum::render(name, variants);
+
+        zip_writer
+            .start_file(format!("src/enums/E{}.ts", name), zip_options)
+            .unwrap();
+        zip_writer.write_all(rendered_enum.as_bytes()).unwrap();
+    }
 
     Ok(())
 }
