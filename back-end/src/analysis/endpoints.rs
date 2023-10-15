@@ -161,6 +161,20 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                 initial_value: "\"\"".to_string(),
                 args_serializer: "AddressValue".to_string(),
             }),
+            "TokenIdentifier" => endpoint_inputs.push(EndpointIO {
+                getter: input.name().to_string().snake_to_camel_case(),
+                setter: format!(
+                    "set{}",
+                    input
+                        .name()
+                        .to_string()
+                        .snake_to_camel_case()
+                        .capitalize_first_letter()
+                ),
+                type_: "string".to_string(),
+                initial_value: "\"\"".to_string(),
+                args_serializer: "TokenIdentifierValue".to_string(),
+            }),
             "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
                 endpoint_inputs.push(EndpointIO {
                     getter: input.name().to_string().snake_to_camel_case(),
@@ -175,7 +189,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                     type_: "number".to_string(),
                     initial_value: "0".to_string(),
                     args_serializer: match input.type_().as_str() {
-                        "usize" => "U8Value".to_string(),
+                        "usize" => "U32Value".to_string(),
                         "u8" => "U8Value".to_string(),
                         "u16" => "U16Value".to_string(),
                         "u32" => "U32Value".to_string(),
@@ -198,7 +212,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                 type_: "number".to_string(),
                 initial_value: "0".to_string(),
                 args_serializer: match input.type_().as_str() {
-                    "isize" => "I8Value".to_string(),
+                    "isize" => "I32Value".to_string(),
                     "i8" => "I8Value".to_string(),
                     "i16" => "I16Value".to_string(),
                     "i32" => "I32Value".to_string(),
@@ -207,7 +221,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                     _ => "".to_string(),
                 },
             }),
-            "bytes" | "utf-8 string" => endpoint_inputs.push(EndpointIO {
+            "bytes" => endpoint_inputs.push(EndpointIO {
                 getter: input.name().to_string().snake_to_camel_case(),
                 setter: format!(
                     "set{}",
@@ -220,6 +234,20 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                 type_: "string".to_string(),
                 initial_value: "\"\"".to_string(),
                 args_serializer: "BytesValue".to_string(),
+            }),
+            "utf-8 string" => endpoint_inputs.push(EndpointIO {
+                getter: input.name().to_string().snake_to_camel_case(),
+                setter: format!(
+                    "set{}",
+                    input
+                        .name()
+                        .to_string()
+                        .snake_to_camel_case()
+                        .capitalize_first_letter()
+                ),
+                type_: "string".to_string(),
+                initial_value: "\"\"".to_string(),
+                args_serializer: "StringValue".to_string(),
             }),
             "bool" => endpoint_inputs.push(EndpointIO {
                 getter: input.name().to_string().snake_to_camel_case(),
@@ -246,7 +274,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         .capitalize_first_letter()
                 ),
                 type_: "string[]".to_string(),
-                initial_value: "[\"\"]".to_string(),
+                initial_value: "[]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
@@ -261,7 +289,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         .capitalize_first_letter()
                 ),
                 type_: "number[]".to_string(),
-                initial_value: "[0]".to_string(),
+                initial_value: "[]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
@@ -276,7 +304,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         .capitalize_first_letter()
                 ),
                 type_: "number[]".to_string(),
-                initial_value: "[0]".to_string(),
+                initial_value: "[]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
@@ -291,7 +319,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         .capitalize_first_letter()
                 ),
                 type_: "number[]".to_string(),
-                initial_value: "[0]".to_string(),
+                initial_value: "[]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
@@ -306,7 +334,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         .capitalize_first_letter()
                 ),
                 type_: "number[]".to_string(),
-                initial_value: "[0]".to_string(),
+                initial_value: "[]".to_string(),
                 args_serializer: "".to_string(),
             }),
             "List<bytes>" | "List<utf-8 string>" | "variadic<bytes>" | "variadic<utf-8 string>" => {
@@ -321,7 +349,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                             .capitalize_first_letter()
                     ),
                     type_: "string[]".to_string(),
-                    initial_value: "[\"\"]".to_string(),
+                    initial_value: "[]".to_string(),
                     args_serializer: "".to_string(),
                 })
             }
@@ -336,7 +364,7 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         .capitalize_first_letter()
                 ),
                 type_: "boolean[]".to_string(),
-                initial_value: "[false]".to_string(),
+                initial_value: "[]".to_string(),
                 args_serializer: "".to_string(),
             }),
             _ => {}
@@ -354,6 +382,13 @@ fn get_endpoint_outputs(outputs: &Vec<Output>) -> Vec<EndpointIO> {
             "Address" => endpoint_outputs.push(EndpointIO {
                 getter: "address".to_string(),
                 setter: "setAddress".to_string(),
+                type_: "string".to_string(),
+                initial_value: "\"\"".to_string(),
+                args_serializer: "".to_string(),
+            }),
+            "TokenIdentifier" => endpoint_outputs.push(EndpointIO {
+                getter: "tokenIdentifier".to_string(),
+                setter: "setTokenIdentifier".to_string(),
                 type_: "string".to_string(),
                 initial_value: "\"\"".to_string(),
                 args_serializer: "".to_string(),
@@ -380,7 +415,7 @@ fn get_endpoint_outputs(outputs: &Vec<Output>) -> Vec<EndpointIO> {
                 getter: "str".to_string(),
                 setter: "setStr".to_string(),
                 type_: "string".to_string(),
-                initial_value: "0".to_string(),
+                initial_value: "\"\"".to_string(),
                 args_serializer: "".to_string(),
             }),
             "bool" => endpoint_outputs.push(EndpointIO {

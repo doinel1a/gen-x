@@ -21,7 +21,11 @@ import {
   import {
     {% for input in inputs %}
       {% if input.args_serializer != "" %}
-        {{ input.args_serializer }},
+        {% if input.args_serializer == "AddressValue" %}
+          AddressValue, Address,
+        {% else %}
+          {{ input.args_serializer }},
+        {% endif %}
       {% endif %}
     {% endfor %}
   } from '@multiversx/sdk-core';
@@ -55,9 +59,15 @@ export default function {{ hook_name }}(
         {% if inputs.len() > 0 %}
           args: [
             {% for input in inputs %}
-                {% if input.args_serializer != "" %}
+              {% if input.args_serializer != "" %}
+                {% if input.args_serializer == "AddressValue" %}
+                  new AddressValue(new Address({{ input.getter }})),
+                {% else if input.args_serializer == "BytesValue" %}
+                  BytesValue.fromUTF8({{ input.getter }}),
+                {% else %}
                   new {{ input.args_serializer }}({{ input.getter }}),
                 {% endif %}
+              {% endif %}
             {% endfor %}
           ]
         {% endif %}
