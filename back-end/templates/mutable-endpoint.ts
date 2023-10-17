@@ -22,7 +22,12 @@ from 'react';
 import {
 	ContractCallPayloadBuilder,
 	ContractFunction,
+
 	{% if inputs.len() > 0 %}
+		{% if does_inputs_include_list %}
+			List,
+		{% endif %}
+
     {% for input in inputs %}
       {% if input.args_serializer != "" %}
         {% if input.args_serializer == "AddressValue" %}
@@ -95,13 +100,29 @@ async function sendTransaction(
 		.setFunction(new ContractFunction('{{ endpoint_name }}'))
 		{% if inputs.len() > 0 %}
 			{% for input in inputs %}
-				{% if input.args_serializer != "" %}
-					{% if input.args_serializer == "AddressValue" %}
-						.addArg(new AddressValue(new Address({{ input.getter }})))
-					{% else if input.args_serializer == "BytesValue" %}
-						.addArg(BytesValue.fromUTF8({{ input.getter }}))
-					{% else %}
-						.addArg(new {{ input.args_serializer }}({{ input.getter }}))
+				{% if input.type_.contains("[]") %}
+					{% if input.args_serializer != "" %}
+						.addArg(
+							List.fromItems({{ input.getter}}.map((value) => 
+								{% if input.args_serializer == "AddressValue" %}
+									new AddressValue(new Address(value))
+								{% else if input.args_serializer == "BytesValue" %}
+									BytesValue.fromUTF8(value)
+								{% else %}
+									new {{ input.args_serializer }}(value)
+								{% endif %}
+							)),
+						)
+					{% endif %}
+				{% else %}
+					{% if input.args_serializer != "" %}
+						{% if input.args_serializer == "AddressValue" %}
+							.addArg(new AddressValue(new Address({{ input.getter }})))
+						{% else if input.args_serializer == "BytesValue" %}
+							.addArg(BytesValue.fromUTF8({{ input.getter }}))
+						{% else %}
+							.addArg(new {{ input.args_serializer }}({{ input.getter }}))
+						{% endif %}
 					{% endif %}
 				{% endif %}
 			{% endfor %}
