@@ -19,6 +19,26 @@ from 'react';
 	import NumericInput from '../inputs/numeric-input';
 {% endif %}
 
+import {
+	ContractCallPayloadBuilder,
+	ContractFunction,
+
+	{% if inputs.len() > 0 %}
+		{% if does_inputs_include_list %}
+			List,
+		{% endif %}
+
+    {% for input in inputs %}
+      {% if input.args_serializer != "" %}
+        {% if input.args_serializer == "AddressValue" %}
+          AddressValue, Address,
+        {% else %}
+          {{ input.args_serializer }},
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+	{% endif %}
+} from '@multiversx/sdk-core/out';
 
 export default function {{ component_name }}Endpoint() {
 	{% if inputs.len() > 0 %}
@@ -76,14 +96,42 @@ async function sendTransaction(
 		{% endfor %}
 	{% endif %}
 ) {
-	const parsedNumber = Number.parseInt(value as unknown as string);
-	const hexNumber = parsedNumber.toString(16);
-
-	const data = hexNumber.length % 2 === 0 ? hexNumber : `0${hexNumber}`;
+	const data = new ContractCallPayloadBuilder()
+		.setFunction(new ContractFunction('{{ endpoint_name }}'))
+		{% if inputs.len() > 0 %}
+			{% for input in inputs %}
+				{% if input.type_.contains("[]") %}
+					{% if input.args_serializer != "" %}
+						.addArg(
+							List.fromItems({{ input.getter}}.map((value) => 
+								{% if input.args_serializer == "AddressValue" %}
+									new AddressValue(new Address(value))
+								{% else if input.args_serializer == "BytesValue" %}
+									BytesValue.fromUTF8(value)
+								{% else %}
+									new {{ input.args_serializer }}(value)
+								{% endif %}
+							)),
+						)
+					{% endif %}
+				{% else %}
+					{% if input.args_serializer != "" %}
+						{% if input.args_serializer == "AddressValue" %}
+							.addArg(new AddressValue(new Address({{ input.getter }})))
+						{% else if input.args_serializer == "BytesValue" %}
+							.addArg(BytesValue.fromUTF8({{ input.getter }}))
+						{% else %}
+							.addArg(new {{ input.args_serializer }}({{ input.getter }}))
+						{% endif %}
+					{% endif %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		.build();
 
 	const transaction = {
 		value: 0,
-		data: `{{ endpoint_name }}@${data}`,
+		data,
 		receiver: contractAddress,
 		gasLimit: '2000000',
 	};
@@ -93,10 +141,10 @@ async function sendTransaction(
 	await sendTransactions({
 		transactions: transaction,
 		transactionsDisplayInfo: {
-			processingMessage: 'Processing {{ endpoint_name }} transaction',
+			processingMessage: 'Processing "{{ endpoint_name }}" transaction',
 			errorMessage:
-				'An error has occured during {{ endpoint_name }} transaction',
-			successMessage: '{{ endpoint_name }} transaction successful',
+				'An error has occured during "{{ endpoint_name }}" transaction',
+			successMessage: '"{{ endpoint_name }}" transaction successful',
 		},
 	});
 }
