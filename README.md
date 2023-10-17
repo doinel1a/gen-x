@@ -195,13 +195,13 @@ The only way to test the solutions is to run it locally:
   - [x] Update [dApp boilerplate][dapp-boilerplate] to the last version;
 - **CI / CD**:
   - [x] Deploy front-end ([vercel][vercel]);
-  - [ ] Deploy back-end ([fly.io][fly.io]);
-  - [ ] Set-up Docker;
-  - [ ] Optimize Docker image size;
-  - [ ] CI / CD github actions;
+  - [x] Deploy back-end ([fly.io][fly.io]);
+  - [x] Set-up Docker;
+  - [x] Optimize Docker image size;
+  - [x] CI / CD github actions;
   - [x] Trigger vercel deployments only on front-end folder push; <br />
         (`git diff --quiet HEAD^ HEAD -- .` in git project settings; `.` since `front-end` is setted as root directory)
-  - [ ] Trigger fly.io deployments, through gh actions, only on back-end folder push;
+  - [x] Trigger fly.io deployments, through gh actions, only on back-end folder push;
 
 [Back to ⬆️](#gen-x "Back to 'Table of contents' section")
 

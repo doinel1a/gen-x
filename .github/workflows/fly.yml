@@ -1,0 +1,31 @@
+name: Fly Deploy
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'back-end/**'
+jobs:
+  deploy:
+    name: Deploy back-end
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Flyctl setup
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Login Docker Hub
+        run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Build & push Docker image
+        working-directory: back-end
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/gen-x-back-end:slim .
+          docker push ${{ secrets.DOCKER_USERNAME }}/gen-x-back-end:slim
+
+      - name: Deploy Docker image to fly.io
+        run: flyctl deploy -a gen-x-back-end --image ${{ secrets.DOCKER_USERNAME }}/gen-x-back-end:slim --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
