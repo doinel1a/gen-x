@@ -15,13 +15,20 @@ import {
   {% if does_outputs_include_address %}
     , Address
   {% endif %}
+  {% if does_inputs_include_list %}
+    , List
+  {% endif %}
 } from '@multiversx/sdk-core/out';
 
 {% if inputs.len() > 0 %}
   import {
     {% for input in inputs %}
       {% if input.args_serializer != "" %}
-        {{ input.args_serializer }},
+        {% if input.args_serializer == "AddressValue" %}
+          AddressValue, Address,
+        {% else %}
+          {{ input.args_serializer }},
+        {% endif %}
       {% endif %}
     {% endfor %}
   } from '@multiversx/sdk-core';
@@ -55,9 +62,29 @@ export default function {{ hook_name }}(
         {% if inputs.len() > 0 %}
           args: [
             {% for input in inputs %}
+              {% if input.type_.contains("[]") %}
                 {% if input.args_serializer != "" %}
-                  new {{ input.args_serializer }}({{ input.getter }}),
+                  List.fromItems({{ input.getter}}.map((value) => {
+                    {% if input.args_serializer == "AddressValue" %}
+                      return new AddressValue(new Address(value))
+                    {% else if input.args_serializer == "BytesValue" %}
+                      return BytesValue.fromUTF8(value)
+                    {% else %}
+                      return new {{ input.args_serializer }}(value)
+                    {% endif %}
+                  })),
                 {% endif %}
+              {% else %}
+                {% if input.args_serializer != "" %}
+                  {% if input.args_serializer == "AddressValue" %}
+                    new AddressValue(new Address({{ input.getter }})),
+                  {% else if input.args_serializer == "BytesValue" %}
+                    BytesValue.fromUTF8({{ input.getter }}),
+                  {% else %}
+                    new {{ input.args_serializer }}({{ input.getter }}),
+                  {% endif %}
+                {% endif %}
+              {% endif %}
             {% endfor %}
           ]
         {% endif %}
