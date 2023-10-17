@@ -29,7 +29,7 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
     .map_err(|error| {
-        let error_message = format!("~ SERVER ERROR: {}", error);
+        let error_message = format!("~~ SERVER ERROR: {}", error);
 
         println!("{}", error_message);
 
