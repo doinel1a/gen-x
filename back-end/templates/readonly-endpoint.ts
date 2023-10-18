@@ -34,6 +34,14 @@ import {
   } from '@multiversx/sdk-core';
 {% endif %}
 
+{% if outputs.len() > 0 %}
+  {% for output in outputs %}
+    {% if output.fields.len() != 0 %}
+      import I{{ output.type_ }} from '../interfaces/I{{ output.type_ }}';
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
 const resultsParser = new ResultsParser();
 
 export default function {{ hook_name }}(
@@ -48,10 +56,27 @@ export default function {{ hook_name }}(
 
   {% if outputs.len() > 0 %}
     {% for output in outputs %}
-      const [
-        {{ output.getter }}{{ loop.index }}, 
-        {{ output.setter }}{{ loop.index }}
-      ] = useState<{{output.type_}}>({{ output.initial_value }});
+      {% if output.fields.len() == 0 %}
+        const [
+          {{ output.getter }}{{ loop.index }}, 
+          {{ output.setter }}{{ loop.index }}
+        ] = useState<{{output.type_}}>({{ output.initial_value }});
+      {% else %}
+        const [
+          {{ output.getter }}, 
+          {{ output.setter }}
+        ] = useState<I{{output.type_}}>({
+          {% for field in output.fields %}
+            {{ field.name }}: {% if field.type_ == "number" %}
+                                0,
+                              {% else if field.type_ == "string" %}
+                                "",
+                              {% else if field.type_ == "boolean" %}
+                                false,
+                              {% endif %}
+          {% endfor %}
+        });
+      {% endif %}
     {% endfor %}
   {% endif %}
 
@@ -121,15 +146,31 @@ export default function {{ hook_name }}(
               {{ output.setter }}{{ loop.index }}(decodedArray);
             {% endif %}
           {% else %}
-            {% if output.getter.contains("Address") %}
-              const decoded = Address.fromHex(responseValue.valueHex).bech32();
-              {{ output.setter }}{{ loop.index }}(decoded);
-            {% else if output.type_ == "number" %}
-              {{ output.setter }}{{ loop.index }}(responseValue.toString(10));
-            {% else if output.type_ == "string" %}
-              {{ output.setter }}{{ loop.index }}(responseValue.toString());
-            {% else if output.type_ == "boolean" %}
-              {{ output.setter }}{{ loop.index }}(responseValue.toString());
+            {% if output.fields.len() == 0 %}
+              {% if output.getter.contains("Address") %}
+                const decoded = Address.fromHex(responseValue.valueHex).bech32();
+                {{ output.setter }}{{ loop.index }}(decoded);
+              {% else if output.type_ == "number" %}
+                {{ output.setter }}{{ loop.index }}(responseValue.toString(10));
+              {% else if output.type_ == "string" %}
+                {{ output.setter }}{{ loop.index }}(responseValue.toString());
+              {% else if output.type_ == "boolean" %}
+                {{ output.setter }}{{ loop.index }}(responseValue.toString());
+              {% endif %}
+            {% else %}
+              const decoded: I{{ output.type_ }} = {
+                {% for field in output.fields %}
+                  {{ field.name }}: {% if field.type_ == "number" %}
+                                      responseValue.{{ field.name }}.toString(10),
+                                    {% else if field.type_ == "string" %}
+                                      responseValue.{{ field.name }}.toString(),
+                                    {% else if field.type_ == "boolean" %}
+                                      responseValue.{{ field.name }}.toString(),
+                                    {% endif %}
+                {% endfor %}
+              };
+
+              {{ output.setter }}(decoded);
             {% endif %}
           {% endif %}
         {% endfor %}
