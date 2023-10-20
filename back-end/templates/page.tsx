@@ -23,7 +23,7 @@ export default function {{ title }}() {
           {% else if endpoint.outputs.len() > 1 %}
             const {
               {%- for output in endpoint.outputs -%}
-                {{ output.getter }}{{ loop.index }},
+                {{ output.getter }},
               {% endfor %}
             } = 
           {% endif %}
@@ -55,7 +55,7 @@ export default function {{ title }}() {
                     <div className="flex flex-col items-center justify-center p-2">
                       <p>{{ endpoint.import_export_name }} response:</p>
                       <span>
-                        { {{ output.getter }}{{ loop.index }} }
+                        { {{ output.getter }} }
                       </span>
                     </div>
                   {% endfor %}

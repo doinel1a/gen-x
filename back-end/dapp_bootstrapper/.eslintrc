@@ -69,7 +69,8 @@
     // end prettier
 
     // unicorn
-    "unicorn/prevent-abbreviations": "off"
+    "unicorn/prevent-abbreviations": "off",
+    "unicorn/filename-case": "off"
     // end unicorn
   }
 }

@@ -31,7 +31,7 @@ import {
         {% endif %}
       {% endif %}
     {% endfor %}
-  } from '@multiversx/sdk-core';
+  } from '@multiversx/sdk-core/out';
 {% endif %}
 
 {% if outputs.len() > 0 %}
@@ -58,8 +58,8 @@ export default function {{ hook_name }}(
     {% for output in outputs %}
       {% if output.fields.len() == 0 %}
         const [
-          {{ output.getter }}{{ loop.index }}, 
-          {{ output.setter }}{{ loop.index }}
+          {{ output.getter }}, 
+          {{ output.setter }}
         ] = useState<{{output.type_}}>({{ output.initial_value }});
       {% else %}
         const [
@@ -89,15 +89,15 @@ export default function {{ hook_name }}(
             {% for input in inputs %}
               {% if input.type_.contains("[]") %}
                 {% if input.args_serializer != "" %}
-                  List.fromItems({{ input.getter}}.map((value) => {
+                  List.fromItems({{ input.getter}}.map((value) => 
                     {% if input.args_serializer == "AddressValue" %}
-                      return new AddressValue(new Address(value))
+                      new AddressValue(new Address(value))
                     {% else if input.args_serializer == "BytesValue" %}
-                      return BytesValue.fromUTF8(value)
+                      BytesValue.fromUTF8(value)
                     {% else %}
-                      return new {{ input.args_serializer }}(value)
+                      new {{ input.args_serializer }}(value)
                     {% endif %}
-                  })),
+                  )),
                 {% endif %}
               {% else %}
                 {% if input.args_serializer != "" %}
@@ -134,28 +134,28 @@ export default function {{ hook_name }}(
           {% if output.type_.contains("[]") %}
             {% if output.getter.contains("Address") %}
               const decodedArray = responseValue.map((value: any) => Address.fromHex(value.valueHex).bech32());
-              {{ output.setter }}{{ loop.index }}(decodedArray);
+              {{ output.setter }}(decodedArray);
             {% else if output.type_ == "number[]" %}
               const decodedArray = responseValue.map((value: any) => value.toString(10));
-              {{ output.setter }}{{ loop.index }}(decodedArray);
+              {{ output.setter }}(decodedArray);
             {% else if output.type_ == "string[]" %}
               const decodedArray = responseValue.map((value: any) => value.toString());
-              {{ output.setter }}{{ loop.index }}(decodedArray);
+              {{ output.setter }}(decodedArray);
             {% else if output.type_ == "boolean[]" %}
               const decodedArray = responseValue.map((value: any) => value.toString());
-              {{ output.setter }}{{ loop.index }}(decodedArray);
+              {{ output.setter }}(decodedArray);
             {% endif %}
           {% else %}
             {% if output.fields.len() == 0 %}
               {% if output.getter.contains("Address") %}
                 const decoded = Address.fromHex(responseValue.valueHex).bech32();
-                {{ output.setter }}{{ loop.index }}(decoded);
+                {{ output.setter }}(decoded);
               {% else if output.type_ == "number" %}
-                {{ output.setter }}{{ loop.index }}(responseValue.toString(10));
+                {{ output.setter }}(responseValue.toString(10));
               {% else if output.type_ == "string" %}
-                {{ output.setter }}{{ loop.index }}(responseValue.toString());
+                {{ output.setter }}(responseValue.toString());
               {% else if output.type_ == "boolean" %}
-                {{ output.setter }}{{ loop.index }}(responseValue.toString());
+                {{ output.setter }}(responseValue.toString());
               {% endif %}
             {% else %}
               const decoded: I{{ output.type_ }} = {
@@ -188,14 +188,8 @@ export default function {{ hook_name }}(
   {% if outputs.len() > 0 %}
     {% if outputs.len() == 1 %}
       {% for output in outputs %}
-        return {{ output.getter }}{{ loop.index }};
+        return {{ output.getter }};
       {% endfor %}
-    {% else %}
-      return {
-        {% for output in outputs %}
-          {{ output.getter }}{{ loop.index }},
-        {% endfor %}
-      };
     {% endif %}
   {% endif %}
 }
