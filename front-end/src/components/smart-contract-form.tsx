@@ -89,8 +89,8 @@ export default function SmartContractForm() {
         )}
       </InputFile>
 
-      <Button type='submit' className='mt-2.5' disabled={true}>
-        WORK IN PROGRESS
+      <Button type='submit' className='mt-2.5'>
+        Generate
       </Button>
     </form>
   );
