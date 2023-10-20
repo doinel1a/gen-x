@@ -43,7 +43,7 @@ async fn generate(body: Json<Body>) -> Result<HttpResponse, Error> {
 
     let custom_structs = get_custom_structs(types);
     let custom_enums = get_custom_enums(types);
-    let mut endpoints_props = get_endpoints_props(endpoints);
+    let mut endpoints_props = get_endpoints_props(&custom_structs, endpoints);
 
     let _ = add_dapp_bootstrapper_files(
         Path::new(&DAPP_BOOTSTRAPPER_URI),

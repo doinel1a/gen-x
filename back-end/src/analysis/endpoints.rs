@@ -28,10 +28,12 @@ pub struct EndpointIO {
     pub setter: String,
     pub type_: String,
     pub initial_value: String,
+    pub fields: Vec<Field>,
     pub args_serializer: String,
 }
 
 pub fn get_endpoints_props(
+    custom_structs: &HashMap<String, Vec<Field>>,
     endpoints: &Vec<Endpoint>,
 ) -> HashMap<(String, String), Vec<EndpointProps>> {
     let mut pages_props: HashMap<(String, String), Vec<EndpointProps>> = Default::default();
@@ -49,8 +51,8 @@ pub fn get_endpoints_props(
             }
         };
         let endpoint_file_name = endpoint.name().to_string().snake_to_kebab_case();
-        let endpoint_inputs = get_endpoint_inputs(endpoint.inputs());
-        let endpoint_outputs = get_endpoint_outputs(endpoint.outputs());
+        let endpoint_inputs = get_endpoint_inputs(custom_structs, endpoint.inputs());
+        let endpoint_outputs = get_endpoint_outputs(custom_structs, endpoint.outputs());
         let endpoint_path = get_endpoint_path(endpoint.docs());
 
         if pages_props.contains_key(&(
@@ -142,41 +144,16 @@ fn get_endpoint_path(docs: &Option<Vec<String>>) -> EndpointPath {
     }
 }
 
-fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
+fn get_endpoint_inputs(
+    custom_structs: &HashMap<String, Vec<Field>>,
+    inputs: &Vec<Field>,
+) -> Vec<EndpointIO> {
     let mut endpoint_inputs = Vec::<EndpointIO>::new();
 
-    for input in inputs {
-        match input.type_().as_str() {
-            "Address" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "AddressValue".to_string(),
-            }),
-            "TokenIdentifier" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "TokenIdentifierValue".to_string(),
-            }),
-            "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
-                endpoint_inputs.push(EndpointIO {
+    for (name, fields) in custom_structs {
+        for input in inputs {
+            match input.type_().as_str() {
+                "Address" => endpoint_inputs.push(EndpointIO {
                     getter: input.name().to_string().snake_to_camel_case(),
                     setter: format!(
                         "set{}",
@@ -186,9 +163,173 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                             .snake_to_camel_case()
                             .capitalize_first_letter()
                     ),
-                    type_: "number".to_string(),
-                    initial_value: "0".to_string(),
-                    args_serializer: match input.type_().as_str() {
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "AddressValue".to_string(),
+                }),
+                "TokenIdentifier" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "TokenIdentifierValue".to_string(),
+                }),
+                "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
+                    endpoint_inputs.push(EndpointIO {
+                        getter: input.name().to_string().snake_to_camel_case(),
+                        setter: format!(
+                            "set{}",
+                            input
+                                .name()
+                                .to_string()
+                                .snake_to_camel_case()
+                                .capitalize_first_letter()
+                        ),
+                        type_: "number".to_string(),
+                        initial_value: "0".to_string(),
+                        fields: Vec::new(),
+                        args_serializer: match input.type_().as_str() {
+                            "usize" => "U32Value".to_string(),
+                            "u8" => "U8Value".to_string(),
+                            "u16" => "U16Value".to_string(),
+                            "u32" => "U32Value".to_string(),
+                            "u64" => "U64Value".to_string(),
+                            "BigUint" => "BigUIntValue".to_string(),
+                            _ => "".to_string(),
+                        },
+                    })
+                }
+                "isize" | "i8" | "i16" | "i32" | "i64" | "BigInt" => {
+                    endpoint_inputs.push(EndpointIO {
+                        getter: input.name().to_string().snake_to_camel_case(),
+                        setter: format!(
+                            "set{}",
+                            input
+                                .name()
+                                .to_string()
+                                .snake_to_camel_case()
+                                .capitalize_first_letter()
+                        ),
+                        type_: "number".to_string(),
+                        initial_value: "0".to_string(),
+                        fields: Vec::new(),
+                        args_serializer: match input.type_().as_str() {
+                            "isize" => "I32Value".to_string(),
+                            "i8" => "I8Value".to_string(),
+                            "i16" => "I16Value".to_string(),
+                            "i32" => "I32Value".to_string(),
+                            "i64" => "I64Value".to_string(),
+                            "BigInt" => "BigIntValue".to_string(),
+                            _ => "".to_string(),
+                        },
+                    })
+                }
+                "bytes" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "BytesValue".to_string(),
+                }),
+                "utf-8 string" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "StringValue".to_string(),
+                }),
+                "bool" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "boolean".to_string(),
+                    initial_value: "false".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "BooleanValue".to_string(),
+                }),
+                "List<Address>" | "variadic<Address>" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "string[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "AddressValue".to_string(),
+                }),
+                "List<TokenIdentifier>" | "variadic<TokenIdentifier>" => {
+                    endpoint_inputs.push(EndpointIO {
+                        getter: input.name().to_string().snake_to_camel_case(),
+                        setter: format!(
+                            "set{}",
+                            input
+                                .name()
+                                .to_string()
+                                .snake_to_camel_case()
+                                .capitalize_first_letter()
+                        ),
+                        type_: "string[]".to_string(),
+                        initial_value: "[]".to_string(),
+                        fields: Vec::new(),
+                        args_serializer: "TokenIdentifierValue".to_string(),
+                    })
+                }
+                "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
+                | "List<BigUint>" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: match input
+                        .type_()
+                        .strip_prefix("List<")
+                        .unwrap()
+                        .trim_end_matches(">")
+                    {
                         "usize" => "U32Value".to_string(),
                         "u8" => "U8Value".to_string(),
                         "u16" => "U16Value".to_string(),
@@ -197,88 +338,95 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                         "BigUint" => "BigUIntValue".to_string(),
                         _ => "".to_string(),
                     },
-                })
-            }
-            "isize" | "i8" | "i16" | "i32" | "i64" | "BigInt" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "number".to_string(),
-                initial_value: "0".to_string(),
-                args_serializer: match input.type_().as_str() {
-                    "isize" => "I32Value".to_string(),
-                    "i8" => "I8Value".to_string(),
-                    "i16" => "I16Value".to_string(),
-                    "i32" => "I32Value".to_string(),
-                    "i64" => "I64Value".to_string(),
-                    "BigInt" => "BigIntValue".to_string(),
-                    _ => "".to_string(),
-                },
-            }),
-            "bytes" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "BytesValue".to_string(),
-            }),
-            "utf-8 string" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "StringValue".to_string(),
-            }),
-            "bool" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "boolean".to_string(),
-                initial_value: "false".to_string(),
-                args_serializer: "BooleanValue".to_string(),
-            }),
-            "List<Address>" | "variadic<Address>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "AddressValue".to_string(),
-            }),
-            "List<TokenIdentifier>" | "variadic<TokenIdentifier>" => {
-                endpoint_inputs.push(EndpointIO {
+                }),
+                "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
+                | "variadic<u64>" | "variadic<BigUint>" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: match input
+                        .type_()
+                        .strip_prefix("List<")
+                        .unwrap()
+                        .trim_end_matches(">")
+                    {
+                        "usize" => "U32Value".to_string(),
+                        "u8" => "U8Value".to_string(),
+                        "u16" => "U16Value".to_string(),
+                        "u32" => "U32Value".to_string(),
+                        "u64" => "U64Value".to_string(),
+                        "BigUint" => "BigUIntValue".to_string(),
+                        _ => "".to_string(),
+                    },
+                }),
+                "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
+                | "List<BigInt>" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: match input
+                        .type_()
+                        .strip_prefix("List<")
+                        .unwrap()
+                        .trim_end_matches(">")
+                    {
+                        "isize" => "I32Value".to_string(),
+                        "i8" => "I8Value".to_string(),
+                        "i16" => "I16Value".to_string(),
+                        "i32" => "I32Value".to_string(),
+                        "i64" => "I64Value".to_string(),
+                        "BigInt" => "BigIntValue".to_string(),
+                        _ => "".to_string(),
+                    },
+                }),
+                "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
+                | "variadic<i64>" | "variadic<BigInt>" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: match input
+                        .type_()
+                        .strip_prefix("List<")
+                        .unwrap()
+                        .trim_end_matches(">")
+                    {
+                        "isize" => "I32Value".to_string(),
+                        "i8" => "I8Value".to_string(),
+                        "i16" => "I16Value".to_string(),
+                        "i32" => "I32Value".to_string(),
+                        "i64" => "I64Value".to_string(),
+                        "BigInt" => "BigIntValue".to_string(),
+                        _ => "".to_string(),
+                    },
+                }),
+                "List<bytes>" | "variadic<bytes>" => endpoint_inputs.push(EndpointIO {
                     getter: input.name().to_string().snake_to_camel_case(),
                     setter: format!(
                         "set{}",
@@ -290,277 +438,207 @@ fn get_endpoint_inputs(inputs: &Vec<Field>) -> Vec<EndpointIO> {
                     ),
                     type_: "string[]".to_string(),
                     initial_value: "[]".to_string(),
-                    args_serializer: "TokenIdentifierValue".to_string(),
-                })
+                    fields: Vec::new(),
+                    args_serializer: "BytesValue".to_string(),
+                }),
+                "List<utf-8 string>" | "variadic<utf-8 string>" => {
+                    endpoint_inputs.push(EndpointIO {
+                        getter: input.name().to_string().snake_to_camel_case(),
+                        setter: format!(
+                            "set{}",
+                            input
+                                .name()
+                                .to_string()
+                                .snake_to_camel_case()
+                                .capitalize_first_letter()
+                        ),
+                        type_: "string[]".to_string(),
+                        initial_value: "[]".to_string(),
+                        fields: Vec::new(),
+                        args_serializer: "StringValue".to_string(),
+                    })
+                }
+                "List<bool>" | "variadic<bool>" => endpoint_inputs.push(EndpointIO {
+                    getter: input.name().to_string().snake_to_camel_case(),
+                    setter: format!(
+                        "set{}",
+                        input
+                            .name()
+                            .to_string()
+                            .snake_to_camel_case()
+                            .capitalize_first_letter()
+                    ),
+                    type_: "boolean[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "BooleanValue".to_string(),
+                }),
+                _ => {
+                    if input.type_().as_str() == name {
+                        endpoint_inputs.push(EndpointIO {
+                            getter: name.to_string().snake_to_camel_case(),
+                            setter: format!(
+                                "set{}",
+                                name.to_string()
+                                    .snake_to_camel_case()
+                                    .capitalize_first_letter()
+                            ),
+                            type_: name.to_string(),
+                            initial_value: "{}".to_string(),
+                            fields: fields.clone(),
+                            args_serializer: "".to_string(),
+                        })
+                    }
+                }
             }
-            "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
-            | "List<BigUint>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: match input
-                    .type_()
-                    .strip_prefix("List<")
-                    .unwrap()
-                    .trim_end_matches(">")
-                {
-                    "usize" => "U32Value".to_string(),
-                    "u8" => "U8Value".to_string(),
-                    "u16" => "U16Value".to_string(),
-                    "u32" => "U32Value".to_string(),
-                    "u64" => "U64Value".to_string(),
-                    "BigUint" => "BigUIntValue".to_string(),
-                    _ => "".to_string(),
-                },
-            }),
-            "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
-            | "variadic<u64>" | "variadic<BigUint>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: match input
-                    .type_()
-                    .strip_prefix("List<")
-                    .unwrap()
-                    .trim_end_matches(">")
-                {
-                    "usize" => "U32Value".to_string(),
-                    "u8" => "U8Value".to_string(),
-                    "u16" => "U16Value".to_string(),
-                    "u32" => "U32Value".to_string(),
-                    "u64" => "U64Value".to_string(),
-                    "BigUint" => "BigUIntValue".to_string(),
-                    _ => "".to_string(),
-                },
-            }),
-            "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
-            | "List<BigInt>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: match input
-                    .type_()
-                    .strip_prefix("List<")
-                    .unwrap()
-                    .trim_end_matches(">")
-                {
-                    "isize" => "I32Value".to_string(),
-                    "i8" => "I8Value".to_string(),
-                    "i16" => "I16Value".to_string(),
-                    "i32" => "I32Value".to_string(),
-                    "i64" => "I64Value".to_string(),
-                    "BigInt" => "BigIntValue".to_string(),
-                    _ => "".to_string(),
-                },
-            }),
-            "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
-            | "variadic<i64>" | "variadic<BigInt>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: match input
-                    .type_()
-                    .strip_prefix("List<")
-                    .unwrap()
-                    .trim_end_matches(">")
-                {
-                    "isize" => "I32Value".to_string(),
-                    "i8" => "I8Value".to_string(),
-                    "i16" => "I16Value".to_string(),
-                    "i32" => "I32Value".to_string(),
-                    "i64" => "I64Value".to_string(),
-                    "BigInt" => "BigIntValue".to_string(),
-                    _ => "".to_string(),
-                },
-            }),
-            "List<bytes>" | "variadic<bytes>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "BytesValue".to_string(),
-            }),
-            "List<utf-8 string>" | "variadic<utf-8 string>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "string[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "StringValue".to_string(),
-            }),
-            "List<bool>" | "variadic<bool>" => endpoint_inputs.push(EndpointIO {
-                getter: input.name().to_string().snake_to_camel_case(),
-                setter: format!(
-                    "set{}",
-                    input
-                        .name()
-                        .to_string()
-                        .snake_to_camel_case()
-                        .capitalize_first_letter()
-                ),
-                type_: "boolean[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "BooleanValue".to_string(),
-            }),
-            _ => {}
         }
     }
 
     endpoint_inputs
 }
 
-fn get_endpoint_outputs(outputs: &Vec<Output>) -> Vec<EndpointIO> {
+fn get_endpoint_outputs(
+    custom_structs: &HashMap<String, Vec<Field>>,
+    outputs: &Vec<Output>,
+) -> Vec<EndpointIO> {
     let mut endpoint_outputs = Vec::<EndpointIO>::new();
 
-    for output in outputs {
-        match output.type_().as_str() {
-            "Address" => endpoint_outputs.push(EndpointIO {
-                getter: "address".to_string(),
-                setter: "setAddress".to_string(),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "TokenIdentifier" => endpoint_outputs.push(EndpointIO {
-                getter: "tokenIdentifier".to_string(),
-                setter: "setTokenIdentifier".to_string(),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
-                endpoint_outputs.push(EndpointIO {
-                    getter: "numb".to_string(),
-                    setter: "setNumb".to_string(),
-                    type_: "number".to_string(),
-                    initial_value: "0".to_string(),
+    for (name, fields) in custom_structs {
+        for output in outputs {
+            match output.type_().as_str() {
+                "Address" => endpoint_outputs.push(EndpointIO {
+                    getter: "address".to_string(),
+                    setter: "setAddress".to_string(),
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
                     args_serializer: "".to_string(),
-                })
-            }
-            "isize" | "i8" | "i16" | "i32" | "i64" | "BigInt" => {
-                endpoint_outputs.push(EndpointIO {
-                    getter: "numb".to_string(),
-                    setter: "setNumb".to_string(),
-                    type_: "number".to_string(),
-                    initial_value: "0".to_string(),
+                }),
+                "TokenIdentifier" => endpoint_outputs.push(EndpointIO {
+                    getter: "tokenIdentifier".to_string(),
+                    setter: "setTokenIdentifier".to_string(),
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
                     args_serializer: "".to_string(),
-                })
-            }
-            "bytes" | "utf-8 string" => endpoint_outputs.push(EndpointIO {
-                getter: "str".to_string(),
-                setter: "setStr".to_string(),
-                type_: "string".to_string(),
-                initial_value: "\"\"".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "bool" => endpoint_outputs.push(EndpointIO {
-                getter: "bool".to_string(),
-                setter: "setBool".to_string(),
-                type_: "boolean".to_string(),
-                initial_value: "false".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "List<Address>" | "variadic<Address>" => endpoint_outputs.push(EndpointIO {
-                getter: "arrayAddress".to_string(),
-                setter: "setArrayAddress".to_string(),
-                type_: "string[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
-            | "List<BigUint>" => endpoint_outputs.push(EndpointIO {
-                getter: "arrayNumber".to_string(),
-                setter: "setArrayNumber".to_string(),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
-            | "variadic<u64>" | "variadic<BigUint>" => endpoint_outputs.push(EndpointIO {
-                getter: "arrayNumber".to_string(),
-                setter: "setArrayNumber".to_string(),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
-            | "List<BigInt>" => endpoint_outputs.push(EndpointIO {
-                getter: "arrayNumber".to_string(),
-                setter: "setArrayNumber".to_string(),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
-            | "variadic<i64>" | "variadic<BigInt>" => endpoint_outputs.push(EndpointIO {
-                getter: "arrayNumber".to_string(),
-                setter: "setArrayNumber".to_string(),
-                type_: "number[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            "List<bytes>" | "List<utf-8 string>" | "variadic<bytes>" | "variadic<utf-8 string>" => {
-                endpoint_outputs.push(EndpointIO {
+                }),
+                "usize" | "u8" | "u16" | "u32" | "u64" | "BigUint" => {
+                    endpoint_outputs.push(EndpointIO {
+                        getter: "numb".to_string(),
+                        setter: "setNumb".to_string(),
+                        type_: "number".to_string(),
+                        initial_value: "0".to_string(),
+                        fields: Vec::new(),
+                        args_serializer: "".to_string(),
+                    })
+                }
+                "isize" | "i8" | "i16" | "i32" | "i64" | "BigInt" => {
+                    endpoint_outputs.push(EndpointIO {
+                        getter: "numb".to_string(),
+                        setter: "setNumb".to_string(),
+                        type_: "number".to_string(),
+                        initial_value: "0".to_string(),
+                        fields: Vec::new(),
+                        args_serializer: "".to_string(),
+                    })
+                }
+                "bytes" | "utf-8 string" => endpoint_outputs.push(EndpointIO {
+                    getter: "str".to_string(),
+                    setter: "setStr".to_string(),
+                    type_: "string".to_string(),
+                    initial_value: "\"\"".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "bool" => endpoint_outputs.push(EndpointIO {
+                    getter: "bool".to_string(),
+                    setter: "setBool".to_string(),
+                    type_: "boolean".to_string(),
+                    initial_value: "false".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "List<Address>" | "variadic<Address>" => endpoint_outputs.push(EndpointIO {
+                    getter: "arrayAddress".to_string(),
+                    setter: "setArrayAddress".to_string(),
+                    type_: "string[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "List<usize>" | "List<u8>" | "List<u16>" | "List<u32>" | "List<u64>"
+                | "List<BigUint>" => endpoint_outputs.push(EndpointIO {
+                    getter: "arrayNumber".to_string(),
+                    setter: "setArrayNumber".to_string(),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "variadic<usize>" | "variadic<u8>" | "variadic<u16>" | "variadic<u32>"
+                | "variadic<u64>" | "variadic<BigUint>" => endpoint_outputs.push(EndpointIO {
+                    getter: "arrayNumber".to_string(),
+                    setter: "setArrayNumber".to_string(),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "List<isize>" | "List<i8>" | "List<i16>" | "List<i32>" | "List<i64>"
+                | "List<BigInt>" => endpoint_outputs.push(EndpointIO {
+                    getter: "arrayNumber".to_string(),
+                    setter: "setArrayNumber".to_string(),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "variadic<isize>" | "variadic<i8>" | "variadic<i16>" | "variadic<i32>"
+                | "variadic<i64>" | "variadic<BigInt>" => endpoint_outputs.push(EndpointIO {
+                    getter: "arrayNumber".to_string(),
+                    setter: "setArrayNumber".to_string(),
+                    type_: "number[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                "List<bytes>"
+                | "List<utf-8 string>"
+                | "variadic<bytes>"
+                | "variadic<utf-8 string>" => endpoint_outputs.push(EndpointIO {
                     getter: "arrayString".to_string(),
                     setter: "setArrayString".to_string(),
                     type_: "string[]".to_string(),
                     initial_value: "[]".to_string(),
+                    fields: Vec::new(),
                     args_serializer: "".to_string(),
-                })
+                }),
+                "List<bool>" | "variadic<bool>" => endpoint_outputs.push(EndpointIO {
+                    getter: "arrayBool".to_string(),
+                    setter: "setArrayBool".to_string(),
+                    type_: "boolean[]".to_string(),
+                    initial_value: "[]".to_string(),
+                    fields: Vec::new(),
+                    args_serializer: "".to_string(),
+                }),
+                _ => {
+                    if output.type_().as_str() == name {
+                        endpoint_outputs.push(EndpointIO {
+                            getter: name.to_string().snake_to_camel_case(),
+                            setter: format!(
+                                "set{}",
+                                name.to_string()
+                                    .snake_to_camel_case()
+                                    .capitalize_first_letter()
+                            ),
+                            type_: name.to_string(),
+                            initial_value: "{}".to_string(),
+                            fields: fields.clone(),
+                            args_serializer: "".to_string(),
+                        })
+                    }
+                }
             }
-            "List<bool>" | "variadic<bool>" => endpoint_outputs.push(EndpointIO {
-                getter: "arrayBool".to_string(),
-                setter: "setArrayBool".to_string(),
-                type_: "boolean[]".to_string(),
-                initial_value: "[]".to_string(),
-                args_serializer: "".to_string(),
-            }),
-            _ => {}
         }
     }
 
