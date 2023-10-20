@@ -1,8 +1,10 @@
 'use client';
 
+import { BACK_END_BASE_URL } from '@/config/urls';
+import { cn } from '@/lib/utils';
 import { SmartContractSchema, SmartContractType } from '@/schemas/smart-contract';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileInput, FileJson2, UploadCloud } from 'lucide-react';
+import { FileInput, FileJson2, Loader2, UploadCloud } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm, type FieldValues } from 'react-hook-form';
 import { Button } from './ui/button';
@@ -39,10 +41,44 @@ export default function SmartContractForm() {
     }
   }
 
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   async function onSubmit(data: FieldValues) {
     console.log('data', data);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const smartContractAbiAsString = await new Response(data.abi[0]).json();
+    console.log('smartContractAbiAsString', smartContractAbiAsString);
+
+    const generationResponse = await fetch(`${BACK_END_BASE_URL}/api/v1/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        sc_address: data.address,
+        sc_abi: smartContractAbiAsString
+      })
+    });
+
+    if (!generationResponse.ok) {
+      // TODO: Error toast
+
+      return;
+    }
+
+    const contentDispositionHeader = generationResponse.headers.get('content-disposition');
+    const templateName = contentDispositionHeader?.match(/filename=(.+)/)?.[1] || 'template.zip';
+
+    const generationBlob = await generationResponse.blob();
+    const blobUrl = URL.createObjectURL(generationBlob);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = blobUrl;
+    downloadLink.download = templateName;
+    document.body.append(downloadLink);
+    downloadLink.click();
+
+    downloadLink.remove();
+    URL.revokeObjectURL(blobUrl);
   }
 
   return (
@@ -89,8 +125,19 @@ export default function SmartContractForm() {
         )}
       </InputFile>
 
-      <Button type='submit' className='mt-2.5' disabled={true}>
-        WORK IN PROGRESS
+      <Button
+        type='submit'
+        className={cn(`mt-2.5 ${isSubmitting ? 'animate-pulse' : ''}`)}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <div className='flex items-center justify-center gap-x-3'>
+            <Loader2 className='animate-spin' />
+            <p>Generating . . .</p>
+          </div>
+        ) : (
+          'Generate'
+        )}
       </Button>
     </form>
   );
