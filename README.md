@@ -115,34 +115,62 @@ Thus, the final version will be more versatile and will be compatible with a gre
 
 ## 🛠 How to
 
-As per today, **Wednesday 11 October**, the API is not yet deployed in the cloud. <br />
-The only way to test the solutions is to run it locally:
+To test the solution:
 
-1. **[Get started](#️-getting-started "Go to 'Getting started' section");**
-2. Build and run the API;
-3. In your favourite API client:
-   1. Set the HTTP Method to `POST`;
-   2. Set the url as `http://localhost:8080/api/v1/generate`;
-   3. Select `Body` and then `JSON`;
-   4. Insert a JSON which must have the following structure:
-      ```json
-      {
-        "sc_abi": {
-          "name": "SC name",
-          "constructor": {
-            "inputs": [ . . . ],
-            "outputs": [ . . . ]
-          },
-          "endpoints": [ . . . ],
-          "events": [ . . . ] ,
-          "hasCallback": false,
-          "types": { . . . }
+- Cloud:
+
+  1. In your favourite API client:
+     1. Set the HTTP Method to `POST`;
+     2. Set the url as `https://gen-x-back-end.fly.dev/api/v1/generate`;
+     3. Select `Body` and then `JSON`;
+     4. Insert a JSON which must have the following structure:
+        ```json
+        {
+          "sc_address": "",
+          "sc_abi": {
+            "name": "SC name",
+            "constructor": {
+              "inputs": [ . . . ],
+              "outputs": [ . . . ]
+            },
+            "endpoints": [ . . . ],
+            "events": [ . . . ] ,
+            "hasCallback": false,
+            "types": { . . . }
+          }
         }
-      }
-      ```
-      **To enable the rendering feature of a endpoint inside a specific page, insert in the documentation of each endpoint a field like `path: /pages/page1`; otherwise it will be rendered in its predefined folder**
-   5. Send request;
-   6. Download .zip project;
+        ```
+        **To enable the rendering feature of a endpoint inside a specific page, insert in the documentation of each endpoint a field like `path: /pages/page1`; otherwise it will be rendered in its predefined folder**
+  2. Send request;
+  3. Download .zip project;
+
+- Locally:
+  1. **[Get started](#️-getting-started "Go to 'Getting started' section");**
+  2. Build and run the API;
+  3. In your favourite API client:
+     1. Set the HTTP Method to `POST`;
+     2. Set the url as `http://localhost:8080/api/v1/generate`;
+     3. Select `Body` and then `JSON`;
+     4. Insert a JSON which must have the following structure:
+     ```json
+       {
+         "sc_address": "",
+         "sc_abi": {
+           "name": "SC name",
+           "constructor": {
+             "inputs": [ . . . ],
+             "outputs": [ . . . ]
+           },
+           "endpoints": [ . . . ],
+           "events": [ . . . ] ,
+           "hasCallback": false,
+           "types": { . . . }
+         }
+       }
+     ```
+     **To enable the rendering feature of a endpoint inside a specific page, insert in the documentation of each endpoint a field like `path: /pages/page1`; otherwise it will be rendered in its predefined folder**
+  4. Send request;
+  5. Download .zip project;
 
 [Back to ⬆️](#gen-x "Back to 'Table of contents' section")
 
@@ -151,7 +179,7 @@ The only way to test the solutions is to run it locally:
 ## ✅ Todo
 
 - **Front-end**:
-  - [ ] Integrate API:
+  - [x] Integrate API:
     - [ ] Display back-end errors in the UI;
 - **Back-end**:
   - [x] Test generate endpoint to download .zip archive;
@@ -169,11 +197,11 @@ The only way to test the solutions is to run it locally:
           - [ ] Input serialization:
             - [ ] Base Rust types;
             - [ ] Struct;
-            - [ ] Enums;
-          - [ ] Output deserialization:
-            - [ ] Base Rust types;
-            - [ ] Struct;
-            - [ ] Enums;
+            - [x] Enums (only rendering);
+          - [x] Output deserialization:
+            - [x] Base Rust types;
+            - [x] Struct;
+            - [x] Enums (only rendering);
       - [x] Mutable:
         - [x] Render single endpoint w/ its inputs & outputs;
         - [x] Render all endpoints;
@@ -183,11 +211,11 @@ The only way to test the solutions is to run it locally:
           - [ ] Input serialization:
             - [ ] Base Rust types;
             - [ ] Struct;
-            - [ ] Enums;
-          - [ ] Output deserialization:
-            - [ ] Base Rust types;
-            - [ ] Struct;
-            - [ ] Enums;
+            - [x] Enums (only rendering);
+          - [x] Output deserialization:
+            - [x] Base Rust types;
+            - [x] Struct;
+            - [x] Enums (only rendering);
     - [x] Custom types:
       - [x] Struct;
       - [x] Enum;
